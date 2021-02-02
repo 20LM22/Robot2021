@@ -164,9 +164,9 @@ public final class Constants {
 	}
 
 	public static final class DriveConstants {
-		public static final int kMasterLeftPort = 4;
+		public static final int kMasterLeftPort = 3;
 		public static final boolean kMasterLeftInvert = false;
-		public static final int kFollowerLeftPort = 3;
+		public static final int kFollowerLeftPort = 4;
 		public static final boolean kFollowerLeftOppose = false;
 
 		public static final int kMasterRightPort = 5;
@@ -217,11 +217,20 @@ public final class Constants {
 		public static final double kRampRate = .1;
 		public static final double kSpeedLimitFactor = .75;
 
-		public static final boolean kLeftSensorPhase = true; //TODO these are totally arbitrary right now and need to be checked
-		public static final boolean kRightSensorPhase = false;
+		public static final boolean kLeftSensorPhase = true;
+		public static final boolean kRightSensorPhase =  true;
 
 		public static final boolean kEnableVoltageComp = true;
 		public static final double kVoltageComp = 12;
+		public static final double kEncoderCounts = 4096;
+
+		//new math for the mag encoders; both are from raw units to m and m/s respectively
+		public static final double kEncoderPositionConversionFactor = (1/DriveConstants.kEncoderCounts)*
+		(1/DriveConstants.kGearRatio) * Math.PI * DriveConstants.kWheelDiameterMeters;
+
+		public static final double kEncoderVelocityConversionFactor = (1/DriveConstants.kEncoderCounts)*
+		(1/DriveConstants.kGearRatio) * Math.PI * DriveConstants.kWheelDiameterMeters * 1000;	
+
 	}
 
 	public static final class FeederConstants {
