@@ -74,7 +74,7 @@ public class DriveSubsystem extends SubsystemBase implements ShuffleboardLogging
         m_masterRight.configVoltageCompSaturation(DriveConstants.kVoltageComp); 
         m_masterRight.enableCurrentLimit(true);
         m_masterRight.configPeakCurrentLimit((int)DriveConstants.kPeakCurrentLimit);
-        // m_masterRight.setSecondaryCurrentLimit(DriveConstants.kPeakCurrentLimit, //again, is this limit necessary?
+        // m_masterRight.setSecondaryCurrentLimit(DriveConstants.kPeakCurrentLimit, //again, is this secondary limit necessary?
         //         DriveConstants.kPeakCurrentDurationMillis);
         m_masterRight.configOpenloopRamp(DriveConstants.kRampRate);
 
