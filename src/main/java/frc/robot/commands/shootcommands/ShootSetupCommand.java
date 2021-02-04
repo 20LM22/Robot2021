@@ -41,7 +41,7 @@ public class ShootSetupCommand extends CommandBase {
             Supplier<FieldLocation> fieldLocation) {
         m_flywheelSubsystem = flywheelSubsystem;
         m_hoodSubsystem = hoodSubsystem;
-        m_flywheelSetpoint = fieldLocation.get().flywheelSetpoint;
+        m_flywheelSetpoint = fieldLocation.get().flywheelSetpoint; //could change this to some number instead TODO --> ask Chris or Andrew about this
         m_hoodSetpoint = fieldLocation.get().hoodSetpoint;
         addRequirements(m_flywheelSubsystem, m_hoodSubsystem);
     }

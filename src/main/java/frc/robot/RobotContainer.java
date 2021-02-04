@@ -2,9 +2,11 @@ package frc.robot;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Hashtable;
 import java.util.List;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
@@ -37,6 +39,7 @@ import frc.robot.commands.armcommands.BounceArmCommand;
 import frc.robot.commands.armcommands.DriveArmCommand;
 import frc.robot.commands.armcommands.ExtendArmCommand;
 import frc.robot.commands.armcommands.RetractArmCommand;
+import frc.robot.commands.autocommands.GalacticSearch;
 import frc.robot.commands.autocommands.ShootCG;
 import frc.robot.commands.autocommands.ShootForwardCG;
 import frc.robot.commands.carouselcommands.AutoSpeedCarouselCommand;
@@ -92,14 +95,14 @@ public class RobotContainer {
 						TrajectoryGenerator.generateTrajectory(new Pose2d(0, 0, new Rotation2d()),
 								List.of(new Translation2d(2, 1), new Translation2d(1, 2), new Translation2d(2, 3)),
 								new Pose2d(0, 4, new Rotation2d()), DriveConstants.kTrajectoryConfig)));
-		m_autoChooser.addOption("Auto",
-				new ShootForwardCG(m_driveSubsystem, m_flywheelSubsystem, m_hoodSubsystem, m_feederSubsystem, m_carouselSubsystem));
+		m_autoChooser.addOption("Auto", new ShootForwardCG(m_driveSubsystem, m_flywheelSubsystem, m_hoodSubsystem,
+				m_feederSubsystem, m_carouselSubsystem));
 		SmartDashboard.putData(m_autoChooser);
 		configureButtonBindings();
 		// configureTestingBindings();
 		configureShuffleboard();
 		// Generate all trajectories at startup to prevent loop overrun
-		// generateAutonomousCommands();
+		generateAutonomousCommands();
 		// LEDs
 		m_arduinoSubsystem.setDefaultCommand(new UpdateLEDsCommand(m_arduinoSubsystem, () -> { // TODO: add more things
 																								// for the LEDs to do
@@ -268,20 +271,76 @@ public class RobotContainer {
 	}
 
 	/**
-	 * Generates all autonomous commands.
+	 * Generates all autonomous commands. UPDATED 2021: sets up trajectories to
+	 * follow in AutoNav challenges and Galatic Search challenges
 	 */
 	private void generateAutonomousCommands() {
-		Hashtable<String, Trajectory> trajectories = new Hashtable<String, Trajectory>();
-		File[] files = new File("\\home\\lvuser\\deploy\\paths\\output").listFiles();
-		for (File file : files)
-			try {
-				trajectories.put(file.getName(), TrajectoryUtil
-						.fromPathweaverJson(Filesystem.getDeployDirectory().toPath().resolve(file.getPath())));
-			} catch (IOException e) {
-				Shuffleboard.getTab("Errors").add("Trajectory Error", e.getStackTrace().toString()).withSize(4, 4)
-						.withPosition(0, 0).withWidget(BuiltInWidgets.kTextView);
-			}
-		for (String name : trajectories.keySet())
-			m_autoChooser.addOption(name, new TrajectoryFollowCommand(m_driveSubsystem, trajectories.get(name)));
+		//Hashtable<String, Trajectory> trajectories = new Hashtable<String, Trajectory>();
+		// File[] files = new File("\\home\\lvuser\\deploy\\paths\\output").listFiles();
+		// create a file that is really a directory
+		// File aDirectory = new File("Robot2021/src/main/deploy/paths");
+		// get a listing of all files in the directory
+		// String[] files = aDirectory.list();
+
+		//will overwriting trajectory cause issues???
+		//String trajectoryJSON = "paths/Slalom.wpilib.json";
+		String trajectoryJSON = "/home/lvuser/deploy/Slalom.wpilib.json";
+		Trajectory trajectory = new Trajectory();
+
+		try {
+			Path trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(trajectoryJSON);
+			trajectory = TrajectoryUtil.fromPathweaverJson(trajectoryPath);
+			m_autoChooser.addOption("Slalom", new TrajectoryFollowCommand(m_driveSubsystem, trajectory));
+		} catch (IOException ex) {
+			DriverStation.reportError("Unable to open trajectory: " + trajectoryJSON, ex.getStackTrace());
+		}
+
+		trajectoryJSON = "/home/lvuser/deploy/BarrelRacing.wpilib.json";
+		try {
+			Path trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(trajectoryJSON);
+			trajectory = TrajectoryUtil.fromPathweaverJson(trajectoryPath);
+			m_autoChooser.addOption("Barrel Racing", new TrajectoryFollowCommand(m_driveSubsystem, trajectory));
+		} catch (IOException ex) {
+			DriverStation.reportError("Unable to open trajectory: " + trajectoryJSON, ex.getStackTrace());
+		}
+
+		trajectoryJSON = "/home/lvuser/deploy/Bounce.wpilib.json";
+		try {
+			Path trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(trajectoryJSON);
+			trajectory = TrajectoryUtil.fromPathweaverJson(trajectoryPath);
+			m_autoChooser.addOption("Bounce", new TrajectoryFollowCommand(m_driveSubsystem, trajectory));
+		} catch (IOException ex) {
+			DriverStation.reportError("Unable to open trajectory: " + trajectoryJSON, ex.getStackTrace());
+		}
+
+		trajectoryJSON = "/home/lvuser/deploy/GalacticSearchABlue.wpilib.json";
+		String trajectoryJSON2 = "/home/lvuser/deploy/GalacticSearchARed.wpilib.json";
+		Trajectory trajectory2 = new Trajectory(); //to be used with galactic search RED
+
+		try {
+			Path trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(trajectoryJSON);
+			trajectory = TrajectoryUtil.fromPathweaverJson(trajectoryPath);
+			Path trajectoryPath2 = Filesystem.getDeployDirectory().toPath().resolve(trajectoryJSON2);
+			trajectory2 = TrajectoryUtil.fromPathweaverJson(trajectoryPath2);
+			m_autoChooser.addOption("Galactic Search A", new GalacticSearch(m_driveSubsystem,
+				m_arduinoSubsystem, trajectory2, trajectory));
+		} catch (IOException ex) {
+			DriverStation.reportError("Unable to open trajectory: " + trajectoryJSON, ex.getStackTrace());
+		}
+
+		trajectoryJSON = "/home/lvuser/deploy/GalacticSearchBBlue.wpilib.json";
+		trajectoryJSON2 = "/home/lvuser/deploy/GalacticSearchBRed.wpilib.json";
+
+		try {
+			Path trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(trajectoryJSON);
+			trajectory = TrajectoryUtil.fromPathweaverJson(trajectoryPath);
+			Path trajectoryPath2 = Filesystem.getDeployDirectory().toPath().resolve(trajectoryJSON2);
+			trajectory2 = TrajectoryUtil.fromPathweaverJson(trajectoryPath2);
+			m_autoChooser.addOption("Galactic Search B", new GalacticSearch(m_driveSubsystem,
+				m_arduinoSubsystem, trajectory2, trajectory));
+		} catch (IOException ex) {
+			DriverStation.reportError("Unable to open trajectory: " + trajectoryJSON, ex.getStackTrace());
+		}
+
 	}
 }

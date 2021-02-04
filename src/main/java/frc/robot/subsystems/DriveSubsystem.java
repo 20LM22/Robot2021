@@ -99,7 +99,6 @@ public class DriveSubsystem extends SubsystemBase implements ShuffleboardLogging
         m_masterRight.configPeakOutputForward(1);
         m_masterRight.configPeakOutputReverse(-1);
 
-
         //Sets up the PID controller within the Talons
         m_masterLeft.config_kP(DriveConstants.kSlotID, DriveConstants.kP); 
         m_masterLeft.config_kI(DriveConstants.kSlotID, DriveConstants.kI);
@@ -244,7 +243,7 @@ public class DriveSubsystem extends SubsystemBase implements ShuffleboardLogging
     }
 
     public void setWheelSpeeds(DifferentialDriveWheelSpeeds wheelSpeeds) {
-        //Unsure whether this will use the PID within the Talons to set a target velocity
+        //Unsure whether this will use the PID within the Talons to set a target velocity: help!
         m_masterLeft.set(ControlMode.Velocity, wheelSpeeds.leftMetersPerSecond); 
         m_masterRight.set(ControlMode.Velocity, wheelSpeeds.rightMetersPerSecond);
         m_followerLeft.set(m_masterLeft.getMotorOutputPercent());
