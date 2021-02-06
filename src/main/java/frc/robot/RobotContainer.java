@@ -56,6 +56,8 @@ import frc.robot.commands.feedercommands.FeederCommand;
 import frc.robot.commands.feedercommands.ReverseFeederCommand;
 import frc.robot.commands.intakecommands.IntakeCommand;
 import frc.robot.commands.intakecommands.OuttakeCommand;
+import frc.robot.commands.shootcommands.DriveHoodCommand;
+import frc.robot.commands.shootcommands.HoodPositionCommand;
 import frc.robot.commands.shootcommands.ShootSetupCommand;
 import frc.robot.subsystems.ArduinoSubsystem;
 import frc.robot.subsystems.ArmSubsystem;
@@ -114,6 +116,7 @@ public class RobotContainer {
 		}, () -> {
 			return m_flywheelSubsystem.getVelocity() / m_flywheelSubsystem.getSetpoint() * 100.0;
 		}));
+		
 	}
 
 	private void configureButtonBindings() {
@@ -216,35 +219,37 @@ public class RobotContainer {
 		// () -> (m_driverController.getRawAxis(Axis.kLeftTrigger) + 1) / 2,
 		// () -> (m_driverController.getRawAxis(Axis.kRightTrigger) + 1) / 2));
 		// // flywheel
-		// new POVButton(m_operatorController, DPad.kUp).whenPressed(() ->
-		// m_flywheelSubsystem.incrementSpeed(),
-		// m_flywheelSubsystem);
-		// new POVButton(m_operatorController, DPad.kDown).whenPressed(() ->
-		// m_flywheelSubsystem.decrementSpeed(),
-		// m_flywheelSubsystem);
-		// new POVButton(m_operatorController,
-		// DPad.kLeft).whenPressed(()->m_flywheelSubsystem.setVelocity(5000));
-		// new POVButton(m_operatorController,
-		// DPad.kRight).whenPressed(()->m_flywheelSubsystem.setVelocity(6000));
-		// new JoystickButton(m_operatorController, Button.kLeftBumper)
-		// .whenPressed(() -> m_flywheelSubsystem.setVelocity(0));
+		new POVButton(m_operatorController, DPad.kUp).whenPressed(() ->
+		m_flywheelSubsystem.incrementSpeed(),
+		m_flywheelSubsystem);
+		new POVButton(m_operatorController, DPad.kDown).whenPressed(() ->
+		m_flywheelSubsystem.decrementSpeed(),
+		m_flywheelSubsystem);
+		new POVButton(m_operatorController,
+		DPad.kLeft).whenPressed(()->m_flywheelSubsystem.setVelocity(5000));
+		new POVButton(m_operatorController,
+		DPad.kRight).whenPressed(()->m_flywheelSubsystem.setVelocity(6000));
+		new JoystickButton(m_operatorController, Button.kLeftBumper)
+		.whenPressed(() -> m_flywheelSubsystem.setVelocity(0));
 		// Hood and flywheel override
-		new POVButton(m_operatorController, DPad.kDown)
-				.whenHeld(new ShootSetupCommand(m_flywheelSubsystem, m_hoodSubsystem, () -> FieldLocation.WALL));
-		new POVButton(m_operatorController, DPad.kLeft)
-				.whenHeld(new ShootSetupCommand(m_flywheelSubsystem, m_hoodSubsystem, () -> FieldLocation.TWOFEET));
-		new POVButton(m_operatorController, DPad.kUp)
-				.whenHeld(new ShootSetupCommand(m_flywheelSubsystem, m_hoodSubsystem, () -> FieldLocation.INITLINE));
-		new POVButton(m_operatorController, DPad.kRight)
-				.whenHeld(new ShootSetupCommand(m_flywheelSubsystem, m_hoodSubsystem, () -> FieldLocation.CLOSETRENCH));
-		// // hood
-		// m_hoodSubsystem.setDefaultCommand(
-		// new DriveHoodCommand(m_hoodSubsystem, () ->
-		// m_operatorController.getRawAxis(Axis.kRightY) * 0.1));
-		// new JoystickButton(m_operatorController, Button.kOptions).whenPressed(() ->
-		// m_hoodSubsystem.resetEncoder());
-		// new JoystickButton(m_operatorController, Button.kRightBumper).whenPressed(new
-		// HoodPositionCommand(m_hoodSubsystem, 0));
+		// new POVButton(m_operatorController, DPad.kDown)
+		// 		.whenHeld(new ShootSetupCommand(m_flywheelSubsystem, m_hoodSubsystem, () -> FieldLocation.WALL));
+		// new POVButton(m_operatorController, DPad.kLeft)
+		// 		.whenHeld(new ShootSetupCommand(m_flywheelSubsystem, m_hoodSubsystem, () -> FieldLocation.TWOFEET));
+		// new POVButton(m_operatorController, DPad.kUp)
+		// 		.whenHeld(new ShootSetupCommand(m_flywheelSubsystem, m_hoodSubsystem, () -> FieldLocation.INITLINE));
+		// new POVButton(m_operatorController, DPad.kRight)
+		// 		.whenHeld(new ShootSetupCommand(m_flywheelSubsystem, m_hoodSubsystem, () -> FieldLocation.CLOSETRENCH));
+		// hood
+		m_hoodSubsystem.setDefaultCommand(
+		new DriveHoodCommand(m_hoodSubsystem, () ->
+		m_operatorController.getRawAxis(Axis.kRightY) * 0.1));
+
+		new JoystickButton(m_operatorController, Button.kOptions).whenPressed(() ->
+		m_hoodSubsystem.resetEncoder());
+
+		new JoystickButton(m_operatorController, Button.kRightBumper).whenPressed(new
+		HoodPositionCommand(m_hoodSubsystem, 0));
 		// arm
 		m_armSubsystem.setDefaultCommand(
 				new DriveArmCommand(m_armSubsystem, () -> (m_operatorController.getRawAxis(Axis.kLeftTrigger) + 1) / 2,
@@ -291,6 +296,7 @@ public class RobotContainer {
 			Path trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(trajectoryJSON);
 			trajectory = TrajectoryUtil.fromPathweaverJson(trajectoryPath);
 			m_autoChooser.addOption("Slalom", new TrajectoryFollowCommand(m_driveSubsystem, trajectory));
+			//System.out.println(trajectory.toString());
 		} catch (IOException ex) {
 			DriverStation.reportError("Unable to open trajectory: " + trajectoryJSON, ex.getStackTrace());
 		}
@@ -323,7 +329,7 @@ public class RobotContainer {
 			Path trajectoryPath2 = Filesystem.getDeployDirectory().toPath().resolve(trajectoryJSON2);
 			trajectory2 = TrajectoryUtil.fromPathweaverJson(trajectoryPath2);
 			m_autoChooser.addOption("Galactic Search A", new GalacticSearch(m_driveSubsystem,
-				m_arduinoSubsystem, trajectory2, trajectory));
+				m_arduinoSubsystem, m_intakeSubsystem, m_carouselSubsystem, m_armSubsystem, trajectory2, trajectory));
 		} catch (IOException ex) {
 			DriverStation.reportError("Unable to open trajectory: " + trajectoryJSON, ex.getStackTrace());
 		}
@@ -337,7 +343,7 @@ public class RobotContainer {
 			Path trajectoryPath2 = Filesystem.getDeployDirectory().toPath().resolve(trajectoryJSON2);
 			trajectory2 = TrajectoryUtil.fromPathweaverJson(trajectoryPath2);
 			m_autoChooser.addOption("Galactic Search B", new GalacticSearch(m_driveSubsystem,
-				m_arduinoSubsystem, trajectory2, trajectory));
+				m_arduinoSubsystem, m_intakeSubsystem, m_carouselSubsystem, m_armSubsystem, trajectory2, trajectory));
 		} catch (IOException ex) {
 			DriverStation.reportError("Unable to open trajectory: " + trajectoryJSON, ex.getStackTrace());
 		}

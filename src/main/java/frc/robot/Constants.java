@@ -164,13 +164,13 @@ public final class Constants {
 	}
 
 	public static final class DriveConstants {
-		public static final int kMasterLeftPort = 1;
+		public static final int kMasterLeftPort = 5;
 		public static final boolean kMasterLeftInvert = false;
 		public static final int kFollowerLeftPort = 4;
 		public static final boolean kFollowerLeftOppose = false;
 
-		public static final int kMasterRightPort = 5;
-		public static final boolean kMasterRightInvert = false;
+		public static final int kMasterRightPort = 4;
+		public static final boolean kMasterRightInvert = true;
 		public static final int kFollowerRightPort = 6;
 		public static final boolean kFollowerRightOppose = false;
 

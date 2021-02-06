@@ -14,6 +14,7 @@ import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.ControlType;
 
+import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.kinematics.DifferentialDriveOdometry;
@@ -28,12 +29,13 @@ import frc.robot.ShuffleboardLogging;
 
 public class DriveSubsystem extends SubsystemBase implements ShuffleboardLogging {
 
+    //removing the followers completely
     private final TalonSRX m_masterLeft = new TalonSRX(DriveConstants.kMasterLeftPort);
-    private final CANSparkMax m_followerLeft = new CANSparkMax(DriveConstants.kFollowerLeftPort, MotorType.kBrushless);
+//    private final CANSparkMax m_followerLeft = new CANSparkMax(DriveConstants.kFollowerLeftPort, MotorType.kBrushless);
 
     private final TalonSRX m_masterRight = new TalonSRX(DriveConstants.kMasterRightPort);
-    private final CANSparkMax m_followerRight = new CANSparkMax(DriveConstants.kFollowerRightPort,
-            MotorType.kBrushless);
+ //   private final CANSparkMax m_followerRight = new CANSparkMax(DriveConstants.kFollowerRightPort,
+ //           MotorType.kBrushless);
 
     private final AHRS m_gyro = new AHRS(DriveConstants.kGyroPort);
     private final DifferentialDriveOdometry m_odometry = new DifferentialDriveOdometry(
@@ -44,51 +46,53 @@ public class DriveSubsystem extends SubsystemBase implements ShuffleboardLogging
      */
     public DriveSubsystem() {
 
-        //front left Talon
+        // front left Talon
         m_masterLeft.configFactoryDefault();
         m_masterLeft.setInverted(DriveConstants.kMasterLeftInvert);
-        m_masterLeft.setNeutralMode(NeutralMode.Brake); 
+        m_masterLeft.setNeutralMode(NeutralMode.Brake);
         m_masterLeft.enableVoltageCompensation(DriveConstants.kEnableVoltageComp);
-        m_masterLeft.configVoltageCompSaturation(DriveConstants.kVoltageComp); 
+        m_masterLeft.configVoltageCompSaturation(DriveConstants.kVoltageComp);
         m_masterLeft.enableCurrentLimit(true);
-        m_masterLeft.configPeakCurrentLimit((int)DriveConstants.kPeakCurrentLimit);
+        m_masterLeft.configPeakCurrentLimit((int) DriveConstants.kPeakCurrentLimit);
         // m_masterLeft.setSecondaryCurrentLimit(DriveConstants.kPeakCurrentLimit,
-        //         DriveConstants.kPeakCurrentDurationMillis); //is this secondary limit necessary?
-        m_masterLeft.configOpenloopRamp(DriveConstants.kRampRate); 
+        // DriveConstants.kPeakCurrentDurationMillis); //is this secondary limit
+        // necessary?
+        m_masterLeft.configOpenloopRamp(DriveConstants.kRampRate);
 
-        //back left Spark Max
-        m_followerLeft.restoreFactoryDefaults();
-        m_followerLeft.setInverted(DriveConstants.kFollowerLeftOppose);
-        m_followerLeft.setIdleMode(IdleMode.kCoast);
-        m_followerLeft.enableVoltageCompensation(DriveConstants.kVoltageComp);
-        m_followerLeft.setSmartCurrentLimit(DriveConstants.kSmartCurrentLimit);
-        m_followerLeft.setSecondaryCurrentLimit(DriveConstants.kPeakCurrentLimit,
-                DriveConstants.kPeakCurrentDurationMillis);
-        m_followerLeft.setOpenLoopRampRate(DriveConstants.kRampRate);
+        // back left Spark Max
+        // m_followerLeft.restoreFactoryDefaults();
+        // m_followerLeft.setInverted(DriveConstants.kFollowerLeftOppose);
+        // m_followerLeft.setIdleMode(IdleMode.kCoast);
+        // m_followerLeft.enableVoltageCompensation(DriveConstants.kVoltageComp);
+        // m_followerLeft.setSmartCurrentLimit(DriveConstants.kSmartCurrentLimit);
+        // m_followerLeft.setSecondaryCurrentLimit(DriveConstants.kPeakCurrentLimit,
+        //         DriveConstants.kPeakCurrentDurationMillis);
+        // m_followerLeft.setOpenLoopRampRate(DriveConstants.kRampRate);
 
-        //front right Talon
+        // front right Talon
         m_masterRight.configFactoryDefault();
         m_masterRight.setInverted(DriveConstants.kMasterRightInvert);
-        m_masterRight.setNeutralMode(NeutralMode.Brake); 
+        m_masterRight.setNeutralMode(NeutralMode.Brake);
         m_masterRight.enableVoltageCompensation(DriveConstants.kEnableVoltageComp);
-        m_masterRight.configVoltageCompSaturation(DriveConstants.kVoltageComp); 
+        m_masterRight.configVoltageCompSaturation(DriveConstants.kVoltageComp);
         m_masterRight.enableCurrentLimit(true);
-        m_masterRight.configPeakCurrentLimit((int)DriveConstants.kPeakCurrentLimit);
-        // m_masterRight.setSecondaryCurrentLimit(DriveConstants.kPeakCurrentLimit, //again, is this secondary limit necessary?
-        //         DriveConstants.kPeakCurrentDurationMillis);
+        m_masterRight.configPeakCurrentLimit((int) DriveConstants.kPeakCurrentLimit);
+        // m_masterRight.setSecondaryCurrentLimit(DriveConstants.kPeakCurrentLimit,
+        // //again, is this secondary limit necessary?
+        // DriveConstants.kPeakCurrentDurationMillis);
         m_masterRight.configOpenloopRamp(DriveConstants.kRampRate);
 
-        //back right Spark Max
-        m_followerRight.restoreFactoryDefaults();
-        m_followerLeft.setInverted(DriveConstants.kFollowerRightOppose);
-        m_followerRight.setIdleMode(IdleMode.kCoast);
-        m_followerRight.enableVoltageCompensation(DriveConstants.kVoltageComp);
-        m_followerRight.setSmartCurrentLimit(DriveConstants.kSmartCurrentLimit);
-        m_followerRight.setSecondaryCurrentLimit(DriveConstants.kPeakCurrentLimit,
-                DriveConstants.kPeakCurrentDurationMillis);
-        m_followerRight.setOpenLoopRampRate(DriveConstants.kRampRate);
+        // // back right Spark Max
+        // m_followerRight.restoreFactoryDefaults();
+        // m_followerLeft.setInverted(DriveConstants.kFollowerRightOppose);
+        // m_followerRight.setIdleMode(IdleMode.kCoast);
+        // m_followerRight.enableVoltageCompensation(DriveConstants.kVoltageComp);
+        // m_followerRight.setSmartCurrentLimit(DriveConstants.kSmartCurrentLimit);
+        // m_followerRight.setSecondaryCurrentLimit(DriveConstants.kPeakCurrentLimit,
+        //         DriveConstants.kPeakCurrentDurationMillis);
+        // m_followerRight.setOpenLoopRampRate(DriveConstants.kRampRate);
 
-        //Potentially needed for PID control - not sure though
+        // Potentially needed for PID control - not sure though
         m_masterLeft.configNominalOutputForward(0);
         m_masterLeft.configNominalOutputReverse(0);
         m_masterLeft.configPeakOutputForward(1);
@@ -99,28 +103,40 @@ public class DriveSubsystem extends SubsystemBase implements ShuffleboardLogging
         m_masterRight.configPeakOutputForward(1);
         m_masterRight.configPeakOutputReverse(-1);
 
-        //Sets up the PID controller within the Talons
-        m_masterLeft.config_kP(DriveConstants.kSlotID, DriveConstants.kP); 
+        // Sets up the PID controller within the Talons
+        m_masterLeft.config_kP(DriveConstants.kSlotID, DriveConstants.kP);
         m_masterLeft.config_kI(DriveConstants.kSlotID, DriveConstants.kI);
-        m_masterLeft.config_IntegralZone(DriveConstants.kSlotID, (int)DriveConstants.kIz); 
-        m_masterLeft.config_kD(DriveConstants.kSlotID, DriveConstants.kD); 
+        m_masterLeft.config_IntegralZone(DriveConstants.kSlotID, (int) DriveConstants.kIz);
+        m_masterLeft.config_kD(DriveConstants.kSlotID, DriveConstants.kD);
         m_masterLeft.config_kF(DriveConstants.kSlotID, DriveConstants.kFF);
 
-        m_masterRight.config_kP(DriveConstants.kSlotID, DriveConstants.kP); 
-        m_masterRight.config_kI(DriveConstants.kSlotID, DriveConstants.kI); 
-        m_masterRight.config_IntegralZone(DriveConstants.kSlotID, (int)DriveConstants.kIz); 
-        m_masterRight.config_kD(DriveConstants.kSlotID, DriveConstants.kD); 
+        m_masterRight.config_kP(DriveConstants.kSlotID, DriveConstants.kP);
+        m_masterRight.config_kI(DriveConstants.kSlotID, DriveConstants.kI);
+        m_masterRight.config_IntegralZone(DriveConstants.kSlotID, (int) DriveConstants.kIz);
+        m_masterRight.config_kD(DriveConstants.kSlotID, DriveConstants.kD);
         m_masterRight.config_kF(DriveConstants.kSlotID, DriveConstants.kFF);
-        
-        //setting up the encoders
-        m_masterLeft.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute, DriveConstants.kSlotID, 10); // TODO - CHECK THIS **parameter 3 is timeout period
-        m_masterRight.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute, DriveConstants.kSlotID, 10); // TODO _ CHECK THIS
+
+        // setting up the encoders
+        m_masterLeft.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute, DriveConstants.kSlotID, 10); // TODO
+                                                                                                                        // -
+                                                                                                                        // CHECK
+                                                                                                                        // THIS
+                                                                                                                        // **parameter
+                                                                                                                        // 3
+                                                                                                                        // is
+                                                                                                                        // timeout
+                                                                                                                        // period
+        m_masterRight.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute, DriveConstants.kSlotID, 10); // TODO
+                                                                                                                         // _
+                                                                                                                         // CHECK
+                                                                                                                         // THIS
 
         m_masterRight.setSelectedSensorPosition(0);
         m_masterLeft.setSelectedSensorPosition(0);
 
-        m_masterLeft.setSensorPhase(DriveConstants.kLeftSensorPhase); //The sensor phase needs to be checked in the phoenix tuner once we've connected to the robot
-        m_masterRight.setSensorPhase(DriveConstants.kRightSensorPhase); //then it can be changed here accordingly
+        m_masterLeft.setSensorPhase(DriveConstants.kLeftSensorPhase); // The sensor phase needs to be checked in the
+                                                                      // phoenix tuner once we've connected to the robot
+        m_masterRight.setSensorPhase(DriveConstants.kRightSensorPhase); // then it can be changed here accordingly
 
         resetOdometry(new Pose2d(0, 0, new Rotation2d()));
     }
@@ -168,7 +184,7 @@ public class DriveSubsystem extends SubsystemBase implements ShuffleboardLogging
      */
     public double getRightEncoderVelocity() {
         return m_masterRight.getSelectedSensorVelocity() * DriveConstants.kEncoderVelocityConversionFactor;
-    
+
     }
 
     /**
@@ -203,8 +219,8 @@ public class DriveSubsystem extends SubsystemBase implements ShuffleboardLogging
      * Sets both encoders to 0
      */
     public void resetEncoders() {
-        m_masterLeft.setSelectedSensorPosition(0); 
-        m_masterRight.setSelectedSensorPosition(0); 
+        m_masterLeft.setSelectedSensorPosition(0);
+        m_masterRight.setSelectedSensorPosition(0);
     }
 
     /**
@@ -230,41 +246,50 @@ public class DriveSubsystem extends SubsystemBase implements ShuffleboardLogging
      * @param rightSpeed Right motors percent output
      */
     public void tankDrive(double leftSpeed, double rightSpeed) {
-        m_masterLeft.set(ControlMode.PercentOutput, leftSpeed);
-        m_masterRight.set(ControlMode.PercentOutput, rightSpeed);
+       m_masterLeft.set(ControlMode.PercentOutput, leftSpeed);
+       m_masterRight.set(ControlMode.PercentOutput, rightSpeed);
 
-        //one option using output percents
-        m_followerLeft.set(m_masterLeft.getMotorOutputPercent());
-        m_followerRight.set(m_masterRight.getMotorOutputPercent());
+        // one option using output percents
+       // m_followerLeft.set(leftSpeed);
+        //m_followerRight.set(m_masterRight.getMotorOutputPercent());
 
-        //another option using voltage
+        // another option using voltage
         // m_followerLeft.setVoltage(m_masterLeft.getMotorOutputVoltage());
         // m_followerRight.setVoltage(m_masterRight.getMotorOutputVoltage());
     }
 
     public void setWheelSpeeds(DifferentialDriveWheelSpeeds wheelSpeeds) {
-        //Unsure whether this will use the PID within the Talons to set a target velocity: help!
-        m_masterLeft.set(ControlMode.Velocity, wheelSpeeds.leftMetersPerSecond); 
+        // Unsure whether this will use the PID within the Talons to set a target
+        // velocity
+        m_masterLeft.set(ControlMode.Velocity, wheelSpeeds.leftMetersPerSecond);
         m_masterRight.set(ControlMode.Velocity, wheelSpeeds.rightMetersPerSecond);
-        m_followerLeft.set(m_masterLeft.getMotorOutputPercent());
-        m_followerRight.set(m_masterRight.getMotorOutputPercent());        
+      //  m_followerLeft.set(m_masterLeft.getMotorOutputPercent());
+      //  m_followerRight.set(m_masterRight.getMotorOutputPercent());
 
-        //This is what was done last year to set the wheel speeds autonomously to a particular velocity:
-        //m_leftPIDController.setReference(wheelSpeeds.leftMetersPerSecond,
-        //ControlType.kVelocity, DriveConstants.kSlotID, DriveConstants.kFeedForward.calculate(wheelSpeeds.leftMetersPerSecond));
+        // This is what was done last year to set the wheel speeds autonomously to a
+        // particular velocity:
+        // m_leftPIDController.setReference(wheelSpeeds.leftMetersPerSecond,
+        // ControlType.kVelocity, DriveConstants.kSlotID,
+        // DriveConstants.kFeedForward.calculate(wheelSpeeds.leftMetersPerSecond));
     }
 
     public void configureShuffleboard() {
         ShuffleboardTab shuffleboardTab = Shuffleboard.getTab("Drive");
-        shuffleboardTab.addNumber("Left speed", () -> getWheelSpeeds().leftMetersPerSecond).withSize(4, 2)
-                .withPosition(0, 0).withWidget(BuiltInWidgets.kGraph);
-        shuffleboardTab.addNumber("Right speed", () -> getWheelSpeeds().rightMetersPerSecond).withSize(4, 2)
-                .withPosition(4, 0).withWidget(BuiltInWidgets.kGraph);
-        shuffleboardTab.addNumber("Left motor speed", () -> getLeftEncoderPosition()).withSize(1, 1)
-                .withPosition(0, 2).withWidget(BuiltInWidgets.kTextView);
-        shuffleboardTab.addNumber("Right motor speed", () -> getRightEncoderPosition()).withSize(1, 1)
-                .withPosition(1, 2).withWidget(BuiltInWidgets.kTextView);
-        shuffleboardTab.addNumber("Heading", () -> getHeading()).withSize(1, 1).withPosition(2, 2)
-                .withWidget(BuiltInWidgets.kTextView);
+        shuffleboardTab.addNumber("Left speed", () ->
+        getWheelSpeeds().leftMetersPerSecond).withSize(4, 2)
+        .withPosition(0, 0).withWidget(BuiltInWidgets.kGraph);
+        shuffleboardTab.addNumber("Right speed", () ->
+        getWheelSpeeds().rightMetersPerSecond).withSize(4, 2)
+        .withPosition(4, 0).withWidget(BuiltInWidgets.kGraph);
+        shuffleboardTab.addNumber("Left motor speed", () ->
+        getLeftEncoderPosition()).withSize(1, 1).withPosition(0, 2)
+        .withWidget(BuiltInWidgets.kTextView);
+        shuffleboardTab.addNumber("Right motor speed", () ->
+        getRightEncoderPosition()).withSize(1, 1)
+        .withPosition(1, 2).withWidget(BuiltInWidgets.kTextView);
+        shuffleboardTab.addNumber("Heading", () -> getHeading()).withSize(1,
+        1).withPosition(2, 2)
+        .withWidget(BuiltInWidgets.kTextView);
+
     }
 }
