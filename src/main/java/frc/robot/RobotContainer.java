@@ -95,7 +95,7 @@ public class RobotContainer {
 		m_autoChooser.addOption("Test path",
 				new TrajectoryFollowCommand(m_driveSubsystem,
 						TrajectoryGenerator.generateTrajectory(new Pose2d(0, 0, new Rotation2d()),
-								List.of(new Translation2d(2, 1), new Translation2d(1, 2), new Translation2d(2, 3)),
+								List.of(new Translation2d(0, 2)),
 								new Pose2d(0, 4, new Rotation2d()), DriveConstants.kTrajectoryConfig)));
 		m_autoChooser.addOption("Auto", new ShootForwardCG(m_driveSubsystem, m_flywheelSubsystem, m_hoodSubsystem,
 				m_feederSubsystem, m_carouselSubsystem));

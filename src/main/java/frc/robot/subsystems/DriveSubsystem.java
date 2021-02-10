@@ -6,6 +6,7 @@ import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
 import com.ctre.phoenix.motorcontrol.TalonSRXFeedbackDevice;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.kauailabs.navx.frc.AHRS;
 import com.revrobotics.CANEncoder;
 import com.revrobotics.CANPIDController;
@@ -29,13 +30,15 @@ import frc.robot.ShuffleboardLogging;
 
 public class DriveSubsystem extends SubsystemBase implements ShuffleboardLogging {
 
-    //removing the followers completely
-    private final TalonSRX m_masterLeft = new TalonSRX(DriveConstants.kMasterLeftPort);
-//    private final CANSparkMax m_followerLeft = new CANSparkMax(DriveConstants.kFollowerLeftPort, MotorType.kBrushless);
+    // removing the followers completely
+    private final WPI_TalonSRX m_masterLeft = new WPI_TalonSRX(DriveConstants.kMasterLeftPort);
+    // private final CANSparkMax m_followerLeft = new
+    // CANSparkMax(DriveConstants.kFollowerLeftPort, MotorType.kBrushless);
 
-    private final TalonSRX m_masterRight = new TalonSRX(DriveConstants.kMasterRightPort);
- //   private final CANSparkMax m_followerRight = new CANSparkMax(DriveConstants.kFollowerRightPort,
- //           MotorType.kBrushless);
+    private final WPI_TalonSRX m_masterRight = new WPI_TalonSRX(DriveConstants.kMasterRightPort);
+    // private final CANSparkMax m_followerRight = new
+    // CANSparkMax(DriveConstants.kFollowerRightPort,
+    // MotorType.kBrushless);
 
     private final AHRS m_gyro = new AHRS(DriveConstants.kGyroPort);
     private final DifferentialDriveOdometry m_odometry = new DifferentialDriveOdometry(
@@ -58,6 +61,8 @@ public class DriveSubsystem extends SubsystemBase implements ShuffleboardLogging
         // DriveConstants.kPeakCurrentDurationMillis); //is this secondary limit
         // necessary?
         m_masterLeft.configOpenloopRamp(DriveConstants.kRampRate);
+        m_masterLeft.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, DriveConstants.kPIDLoopIdx,
+                10);
 
         // back left Spark Max
         // m_followerLeft.restoreFactoryDefaults();
@@ -66,7 +71,7 @@ public class DriveSubsystem extends SubsystemBase implements ShuffleboardLogging
         // m_followerLeft.enableVoltageCompensation(DriveConstants.kVoltageComp);
         // m_followerLeft.setSmartCurrentLimit(DriveConstants.kSmartCurrentLimit);
         // m_followerLeft.setSecondaryCurrentLimit(DriveConstants.kPeakCurrentLimit,
-        //         DriveConstants.kPeakCurrentDurationMillis);
+        // DriveConstants.kPeakCurrentDurationMillis);
         // m_followerLeft.setOpenLoopRampRate(DriveConstants.kRampRate);
 
         // front right Talon
@@ -81,6 +86,8 @@ public class DriveSubsystem extends SubsystemBase implements ShuffleboardLogging
         // //again, is this secondary limit necessary?
         // DriveConstants.kPeakCurrentDurationMillis);
         m_masterRight.configOpenloopRamp(DriveConstants.kRampRate);
+        m_masterRight.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, DriveConstants.kPIDLoopIdx2,
+                10);
 
         // // back right Spark Max
         // m_followerRight.restoreFactoryDefaults();
@@ -89,8 +96,18 @@ public class DriveSubsystem extends SubsystemBase implements ShuffleboardLogging
         // m_followerRight.enableVoltageCompensation(DriveConstants.kVoltageComp);
         // m_followerRight.setSmartCurrentLimit(DriveConstants.kSmartCurrentLimit);
         // m_followerRight.setSecondaryCurrentLimit(DriveConstants.kPeakCurrentLimit,
-        //         DriveConstants.kPeakCurrentDurationMillis);
+        // DriveConstants.kPeakCurrentDurationMillis);
         // m_followerRight.setOpenLoopRampRate(DriveConstants.kRampRate);
+
+        /* Config the Velocity closed loop gains in slot0 */
+        // _talon.config_kF(Constants.kPIDLoopIdx, Constants.kGains_Velocit.kF,
+        // Constants.kTimeoutMs);
+        // _talon.config_kP(Constants.kPIDLoopIdx, Constants.kGains_Velocit.kP,
+        // Constants.kTimeoutMs);
+        // _talon.config_kI(Constants.kPIDLoopIdx, Constants.kGains_Velocit.kI,
+        // Constants.kTimeoutMs);
+        // _talon.config_kD(Constants.kPIDLoopIdx, Constants.kGains_Velocit.kD,
+        // Constants.kTimeoutMs)
 
         // Potentially needed for PID control - not sure though
         m_masterLeft.configNominalOutputForward(0);
@@ -104,39 +121,29 @@ public class DriveSubsystem extends SubsystemBase implements ShuffleboardLogging
         m_masterRight.configPeakOutputReverse(-1);
 
         // Sets up the PID controller within the Talons
-        m_masterLeft.config_kP(DriveConstants.kSlotID, DriveConstants.kP);
-        m_masterLeft.config_kI(DriveConstants.kSlotID, DriveConstants.kI);
-        m_masterLeft.config_IntegralZone(DriveConstants.kSlotID, (int) DriveConstants.kIz);
-        m_masterLeft.config_kD(DriveConstants.kSlotID, DriveConstants.kD);
-        m_masterLeft.config_kF(DriveConstants.kSlotID, DriveConstants.kFF);
+        //update 2/9: might need to get rid of this pid stuff - potentially being handled by ramsete
+        m_masterLeft.config_kP(DriveConstants.kPIDLoopIdx, DriveConstants.kP);
+        m_masterLeft.config_kI(DriveConstants.kPIDLoopIdx, DriveConstants.kI);
+        m_masterLeft.config_IntegralZone(DriveConstants.kPIDLoopIdx, (int) DriveConstants.kIz);
+        m_masterLeft.config_kD(DriveConstants.kPIDLoopIdx, DriveConstants.kD);
+        m_masterLeft.config_kF(DriveConstants.kPIDLoopIdx, DriveConstants.kFF);
 
-        m_masterRight.config_kP(DriveConstants.kSlotID, DriveConstants.kP);
-        m_masterRight.config_kI(DriveConstants.kSlotID, DriveConstants.kI);
-        m_masterRight.config_IntegralZone(DriveConstants.kSlotID, (int) DriveConstants.kIz);
-        m_masterRight.config_kD(DriveConstants.kSlotID, DriveConstants.kD);
-        m_masterRight.config_kF(DriveConstants.kSlotID, DriveConstants.kFF);
+        m_masterRight.config_kP(DriveConstants.kPIDLoopIdx2, DriveConstants.kP);
+        m_masterRight.config_kI(DriveConstants.kPIDLoopIdx2, DriveConstants.kI);
+        m_masterRight.config_IntegralZone(DriveConstants.kPIDLoopIdx2, (int) DriveConstants.kIz);
+        m_masterRight.config_kD(DriveConstants.kPIDLoopIdx2, DriveConstants.kD);
+        m_masterRight.config_kF(DriveConstants.kPIDLoopIdx2, DriveConstants.kFF);
 
         // setting up the encoders
-        m_masterLeft.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute, DriveConstants.kSlotID, 10); // TODO
-                                                                                                                        // -
-                                                                                                                        // CHECK
-                                                                                                                        // THIS
-                                                                                                                        // **parameter
-                                                                                                                        // 3
-                                                                                                                        // is
-                                                                                                                        // timeout
-                                                                                                                        // period
-        m_masterRight.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute, DriveConstants.kSlotID, 10); // TODO
-                                                                                                                         // _
-                                                                                                                         // CHECK
-                                                                                                                         // THIS
-
         m_masterRight.setSelectedSensorPosition(0);
         m_masterLeft.setSelectedSensorPosition(0);
 
         m_masterLeft.setSensorPhase(DriveConstants.kLeftSensorPhase); // The sensor phase needs to be checked in the
                                                                       // phoenix tuner once we've connected to the robot
         m_masterRight.setSensorPhase(DriveConstants.kRightSensorPhase); // then it can be changed here accordingly
+        //**update as of 2/9: when last checked, the sensors were in phase so they are good
+
+        m_gyro.calibrate(); //this might become an issue
 
         resetOdometry(new Pose2d(0, 0, new Rotation2d()));
     }
@@ -155,7 +162,10 @@ public class DriveSubsystem extends SubsystemBase implements ShuffleboardLogging
      * @return The left encoder position (meters)
      */
     public double getLeftEncoderPosition() {
-        return m_masterLeft.getSelectedSensorPosition() * DriveConstants.kEncoderPositionConversionFactor;
+        // return m_masterLeft.getSelectedSensorPosition() *
+        // DriveConstants.kEncoderPositionConversionFactor;
+        return m_masterLeft.getSelectedSensorPosition() * DriveConstants.kEncoderTestPositionFactor;
+
     }
 
     /**
@@ -246,50 +256,50 @@ public class DriveSubsystem extends SubsystemBase implements ShuffleboardLogging
      * @param rightSpeed Right motors percent output
      */
     public void tankDrive(double leftSpeed, double rightSpeed) {
-       m_masterLeft.set(ControlMode.PercentOutput, leftSpeed);
-       m_masterRight.set(ControlMode.PercentOutput, rightSpeed);
+        m_masterLeft.set(ControlMode.PercentOutput, leftSpeed);
+        m_masterRight.set(ControlMode.PercentOutput, rightSpeed);
+        m_masterLeft.feed(); //potentially comment these out if they are not working
+        m_masterRight.feed();
 
-        // one option using output percents
-       // m_followerLeft.set(leftSpeed);
-        //m_followerRight.set(m_masterRight.getMotorOutputPercent());
+        // System.out.println("angle of gyro: " + getHeading());
+        // System.out.println("distance traveled: " + getLeftEncoderPosition());
+    }
 
-        // another option using voltage
-        // m_followerLeft.setVoltage(m_masterLeft.getMotorOutputVoltage());
-        // m_followerRight.setVoltage(m_masterRight.getMotorOutputVoltage());
+    public void tankDriveVolts(double leftVolts, double rightVolts) {
+        m_masterLeft.setVoltage(leftVolts);
+        m_masterRight.setVoltage(rightVolts);
+        m_masterLeft.feed();
+        m_masterRight.feed();
     }
 
     public void setWheelSpeeds(DifferentialDriveWheelSpeeds wheelSpeeds) {
         // Unsure whether this will use the PID within the Talons to set a target
         // velocity
-        m_masterLeft.set(ControlMode.Velocity, wheelSpeeds.leftMetersPerSecond);
-        m_masterRight.set(ControlMode.Velocity, wheelSpeeds.rightMetersPerSecond);
-      //  m_followerLeft.set(m_masterLeft.getMotorOutputPercent());
-      //  m_followerRight.set(m_masterRight.getMotorOutputPercent());
 
-        // This is what was done last year to set the wheel speeds autonomously to a
-        // particular velocity:
-        // m_leftPIDController.setReference(wheelSpeeds.leftMetersPerSecond,
-        // ControlType.kVelocity, DriveConstants.kSlotID,
-        // DriveConstants.kFeedForward.calculate(wheelSpeeds.leftMetersPerSecond));
+        double targetVelocity_UnitsPer100msLEFT = wheelSpeeds.leftMetersPerSecond * 1
+                / DriveConstants.kEncoderVelocityConversionFactor;
+        double targetVelocity_UnitsPer100msRIGHT = wheelSpeeds.rightMetersPerSecond * 1
+                / DriveConstants.kEncoderVelocityConversionFactor;
+
+        m_masterLeft.set(ControlMode.Velocity, targetVelocity_UnitsPer100msLEFT);
+        m_masterRight.set(ControlMode.Velocity, targetVelocity_UnitsPer100msRIGHT);
+
+        m_masterLeft.feed(); //potentially comment these out again
+        m_masterRight.feed();
     }
 
     public void configureShuffleboard() {
         ShuffleboardTab shuffleboardTab = Shuffleboard.getTab("Drive");
-        shuffleboardTab.addNumber("Left speed", () ->
-        getWheelSpeeds().leftMetersPerSecond).withSize(4, 2)
-        .withPosition(0, 0).withWidget(BuiltInWidgets.kGraph);
-        shuffleboardTab.addNumber("Right speed", () ->
-        getWheelSpeeds().rightMetersPerSecond).withSize(4, 2)
-        .withPosition(4, 0).withWidget(BuiltInWidgets.kGraph);
-        shuffleboardTab.addNumber("Left motor speed", () ->
-        getLeftEncoderPosition()).withSize(1, 1).withPosition(0, 2)
-        .withWidget(BuiltInWidgets.kTextView);
-        shuffleboardTab.addNumber("Right motor speed", () ->
-        getRightEncoderPosition()).withSize(1, 1)
-        .withPosition(1, 2).withWidget(BuiltInWidgets.kTextView);
-        shuffleboardTab.addNumber("Heading", () -> getHeading()).withSize(1,
-        1).withPosition(2, 2)
-        .withWidget(BuiltInWidgets.kTextView);
+        shuffleboardTab.addNumber("Left speed", () -> getWheelSpeeds().leftMetersPerSecond).withSize(4, 2)
+                .withPosition(0, 0).withWidget(BuiltInWidgets.kGraph);
+        shuffleboardTab.addNumber("Right speed", () -> getWheelSpeeds().rightMetersPerSecond).withSize(4, 2)
+                .withPosition(4, 0).withWidget(BuiltInWidgets.kGraph);
+        shuffleboardTab.addNumber("Left motor speed", () -> getLeftEncoderPosition()).withSize(1, 1).withPosition(0, 2)
+                .withWidget(BuiltInWidgets.kTextView);
+        shuffleboardTab.addNumber("Right motor speed", () -> getRightEncoderPosition()).withSize(1, 1)
+                .withPosition(1, 2).withWidget(BuiltInWidgets.kTextView);
+        shuffleboardTab.addNumber("Heading", () -> getHeading()).withSize(1, 1).withPosition(2, 2)
+                .withWidget(BuiltInWidgets.kTextView);
 
     }
 }

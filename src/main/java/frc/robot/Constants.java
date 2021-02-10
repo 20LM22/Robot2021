@@ -164,15 +164,15 @@ public final class Constants {
 	}
 
 	public static final class DriveConstants {
-		public static final int kMasterLeftPort = 5;
-		public static final boolean kMasterLeftInvert = false;
-		public static final int kFollowerLeftPort = 4;
-		public static final boolean kFollowerLeftOppose = false;
+		public static final int kMasterLeftPort = 1; //revert to 5
+		public static final boolean kMasterLeftInvert = false; //revert to false
+		public static final int kFollowerLeftPort = 4; //revert to 4
+		public static final boolean kFollowerLeftOppose = false; //revert to false
 
-		public static final int kMasterRightPort = 4;
-		public static final boolean kMasterRightInvert = true;
-		public static final int kFollowerRightPort = 6;
-		public static final boolean kFollowerRightOppose = false;
+		public static final int kMasterRightPort = 4; //revert to 4
+		public static final boolean kMasterRightInvert = true; //revert to true
+		public static final int kFollowerRightPort = 6; //revert to 6
+		public static final boolean kFollowerRightOppose = false; //revert to false
 
 		public static final int kSmartCurrentLimit = 60;
 		public static final double kPeakCurrentLimit = 75;
@@ -185,6 +185,8 @@ public final class Constants {
 		public static final double kMaxOutput = 1;
 		public static final double kMinOutput = -1;
 		public static final int kSlotID = 0;
+		public static final int kPIDLoopIdx = 0;
+		public static final int kPIDLoopIdx2 = 1;
 
 		public static final SPI.Port kGyroPort = SPI.Port.kMXP;
 		public static final boolean kGyroReversed = true;
@@ -198,6 +200,22 @@ public final class Constants {
 		public static final double kMaxRotSpeedMetersPerSecond = 1;
 		public static final double kWheelDiameterMeters = Units.inchesToMeters(6);
 		public static final double kGearRatio = 8.18;
+
+		public static final double kPDriveVel = .266;
+		//public static final double kRotationalToTangentialRatio = kGearRatio * Math.PI * kWheelDiameterMeters;
+
+		// public static final double ksVolts = .77;
+		// public static final double kvVoltSecondsPerMeter = 5.84;
+		// public static final double kaVoltSecondsSquaredPerMeter = .627;
+		// public static final double kPDriveVel = 1.69;
+		// public static final double kTrackwidthMeters = 0.713288;
+		// public static final double kMaxSpeedMetersPerSecond = 2;
+		// public static final double kMaxAccelerationMetersPerSecondSquared = .6;
+		// public static final double kMaxRotSpeedMetersPerSecond = 2;
+		// public static final double kRamseteB = 2;
+		// public static final double kRamseteZeta = .7;
+		// public static final double kWheelDiameterMeters = .1524;
+		// public static final double kEncoderEdgesPerRotation = 4106;
 
 		public static final DifferentialDriveKinematics kDriveKinematics = new DifferentialDriveKinematics(
 				kTrackwidthMeters);
@@ -221,15 +239,18 @@ public final class Constants {
 		public static final boolean kRightSensorPhase =  true;
 
 		public static final boolean kEnableVoltageComp = true;
-		public static final double kVoltageComp = 12;
+		public static final double kVoltageComp = 6;
 		public static final double kEncoderCounts = 4096;
 
 		//new math for the mag encoders; both are from raw units to m and m/s respectively
 		public static final double kEncoderPositionConversionFactor = (1/DriveConstants.kEncoderCounts)*
-		(1/DriveConstants.kGearRatio) * Math.PI * DriveConstants.kWheelDiameterMeters;
+		(1/DriveConstants.kGearRatio) * Math.PI * DriveConstants.kWheelDiameterMeters; //note to self: gear ratio left out?
 
 		public static final double kEncoderVelocityConversionFactor = (1/DriveConstants.kEncoderCounts)*
-		(1/DriveConstants.kGearRatio) * Math.PI * DriveConstants.kWheelDiameterMeters * 1000;	
+		(1/DriveConstants.kGearRatio) * Math.PI * DriveConstants.kWheelDiameterMeters * 1000; //note to self: possibly just times 10
+		
+		public static final double kEncoderTestPositionFactor = (1/DriveConstants.kEncoderCounts)*
+		0.105; 
 
 	}
 

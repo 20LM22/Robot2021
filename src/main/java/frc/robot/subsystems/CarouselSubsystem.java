@@ -49,7 +49,7 @@ public class CarouselSubsystem extends SubsystemBase implements ShuffleboardLogg
 	}
 
 	public void periodic() {
-		System.out.println("Sensor: " + m_magSensor.get());
+		//System.out.println("Sensor: " + m_magSensor.get());
 		if (!m_magSensor.get()) {
 			m_lastSensorPosition = getPosition();
 		}

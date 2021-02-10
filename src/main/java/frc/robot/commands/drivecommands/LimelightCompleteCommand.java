@@ -77,14 +77,20 @@ public class LimelightCompleteCommand extends CommandBase {
         double robotTranslationSpeed = m_distanceController.calculate(m_limelightSubsystem.getDistance());
         DifferentialDriveWheelSpeeds wheelSpeeds = DriveConstants.kDriveKinematics
                 .toWheelSpeeds(new ChassisSpeeds(robotTranslationSpeed, 0, robotTurnSpeed));
-        m_driveSubsystem.setWheelSpeeds(wheelSpeeds);
+        
+        // m_driveSubsystem.setWheelSpeeds(wheelSpeeds); //if we need to try this route, then comment out the stuff below
+
+        double leftVoltage = DriveConstants.kFeedForward.calculate(wheelSpeeds.leftMetersPerSecond);
+        double rightVoltage = DriveConstants.kFeedForward.calculate(wheelSpeeds.rightMetersPerSecond);
+        m_driveSubsystem.tankDriveVolts(leftVoltage, rightVoltage);
     }
 
     /**
      * Stop the drivetrain at the end of the command
      */
     public void end(boolean interrputed) {
-        m_driveSubsystem.tankDrive(0, 0);
+        m_driveSubsystem.tankDriveVolts(0, 0);
+        //m_driveSubsystem.tankDrive(0, 0);
     }
 
     /**
