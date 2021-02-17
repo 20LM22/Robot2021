@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.geometry.Transform2d;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -92,11 +93,12 @@ public class RobotContainer {
 			m_intakeSubsystem, m_limelightSubsystem };
 
 	public RobotContainer() {
-		m_autoChooser.addOption("Test path",
-				new TrajectoryFollowCommand(m_driveSubsystem,
-						TrajectoryGenerator.generateTrajectory(new Pose2d(0, 0, new Rotation2d()),
-								List.of(new Translation2d(0, 2)),
-								new Pose2d(0, 4, new Rotation2d()), DriveConstants.kTrajectoryConfig)));
+		// m_autoChooser.addOption("Test path",
+		// 		new TrajectoryFollowCommand(m_driveSubsystem,
+		// 				TrajectoryGenerator.generateTrajectory(new Pose2d(0, 0, new Rotation2d()),
+		// 						List.of(new Translation2d(.5, 0)), new Pose2d(1, 0, new Rotation2d()),
+		// 						DriveConstants.kTrajectoryConfig)));
+		m_limelightSubsystem.turnOffLight();
 		m_autoChooser.addOption("Auto", new ShootForwardCG(m_driveSubsystem, m_flywheelSubsystem, m_hoodSubsystem,
 				m_feederSubsystem, m_carouselSubsystem));
 		SmartDashboard.putData(m_autoChooser);
@@ -116,7 +118,7 @@ public class RobotContainer {
 		}, () -> {
 			return m_flywheelSubsystem.getVelocity() / m_flywheelSubsystem.getSetpoint() * 100.0;
 		}));
-		
+
 	}
 
 	private void configureButtonBindings() {
@@ -178,19 +180,19 @@ public class RobotContainer {
 				.whenHeld(new RunCarouselCommand(m_carouselSubsystem, CarouselConstants.kJostleVelocity));
 		// Hood and flywheel override
 		new POVButton(m_operatorController, DPad.kDown).whenHeld(new ParallelCommandGroup(
-				new ShootSetupCommand(m_flywheelSubsystem, m_hoodSubsystem, () -> FieldLocation.WALL),
+				new ShootSetupCommand(m_flywheelSubsystem, m_hoodSubsystem, () -> FieldLocation.WALL), // WALL
 				new AutoFeederCommand(m_feederSubsystem, m_carouselSubsystem::atOpenSpace,
 						m_flywheelSubsystem::atSetpoint)));
 		new POVButton(m_operatorController, DPad.kLeft).whenHeld(new ParallelCommandGroup(
-				new ShootSetupCommand(m_flywheelSubsystem, m_hoodSubsystem, () -> FieldLocation.INITLINE),
+				new ShootSetupCommand(m_flywheelSubsystem, m_hoodSubsystem, () -> FieldLocation.INITLINE), // INITLINE
 				new AutoFeederCommand(m_feederSubsystem, m_carouselSubsystem::atOpenSpace,
 						m_flywheelSubsystem::atSetpoint)));
 		new POVButton(m_operatorController, DPad.kUp).whenHeld(new ParallelCommandGroup(
-				new ShootSetupCommand(m_flywheelSubsystem, m_hoodSubsystem, () -> FieldLocation.CLOSETRENCH),
+				new ShootSetupCommand(m_flywheelSubsystem, m_hoodSubsystem, () -> FieldLocation.CLOSETRENCH), // CLOSETRENCH
 				new AutoFeederCommand(m_feederSubsystem, m_carouselSubsystem::atOpenSpace,
 						m_flywheelSubsystem::atSetpoint)));
 		new POVButton(m_operatorController, DPad.kRight).whenHeld(new ParallelCommandGroup(
-				new ShootSetupCommand(m_flywheelSubsystem, m_hoodSubsystem, () -> FieldLocation.FARTWRENCH),
+				new ShootSetupCommand(m_flywheelSubsystem, m_hoodSubsystem, () -> FieldLocation.FARTWRENCH), // FARTWRENCH
 				new AutoFeederCommand(m_feederSubsystem, m_carouselSubsystem::atOpenSpace,
 						m_flywheelSubsystem::atSetpoint)));
 		// Zero hood encoder
@@ -219,37 +221,35 @@ public class RobotContainer {
 		// () -> (m_driverController.getRawAxis(Axis.kLeftTrigger) + 1) / 2,
 		// () -> (m_driverController.getRawAxis(Axis.kRightTrigger) + 1) / 2));
 		// // flywheel
-		new POVButton(m_operatorController, DPad.kUp).whenPressed(() ->
-		m_flywheelSubsystem.incrementSpeed(),
-		m_flywheelSubsystem);
-		new POVButton(m_operatorController, DPad.kDown).whenPressed(() ->
-		m_flywheelSubsystem.decrementSpeed(),
-		m_flywheelSubsystem);
-		new POVButton(m_operatorController,
-		DPad.kLeft).whenPressed(()->m_flywheelSubsystem.setVelocity(5000));
-		new POVButton(m_operatorController,
-		DPad.kRight).whenPressed(()->m_flywheelSubsystem.setVelocity(6000));
+		new POVButton(m_operatorController, DPad.kUp).whenPressed(() -> m_flywheelSubsystem.incrementSpeed(),
+				m_flywheelSubsystem);
+		new POVButton(m_operatorController, DPad.kDown).whenPressed(() -> m_flywheelSubsystem.decrementSpeed(),
+				m_flywheelSubsystem);
+		new POVButton(m_operatorController, DPad.kLeft).whenPressed(() -> m_flywheelSubsystem.setVelocity(5000));
+		new POVButton(m_operatorController, DPad.kRight).whenPressed(() -> m_flywheelSubsystem.setVelocity(6000));
 		new JoystickButton(m_operatorController, Button.kLeftBumper)
-		.whenPressed(() -> m_flywheelSubsystem.setVelocity(0));
+				.whenPressed(() -> m_flywheelSubsystem.setVelocity(0));
 		// Hood and flywheel override
 		// new POVButton(m_operatorController, DPad.kDown)
-		// 		.whenHeld(new ShootSetupCommand(m_flywheelSubsystem, m_hoodSubsystem, () -> FieldLocation.WALL));
+		// .whenHeld(new ShootSetupCommand(m_flywheelSubsystem, m_hoodSubsystem, () ->
+		// FieldLocation.WALL));
 		// new POVButton(m_operatorController, DPad.kLeft)
-		// 		.whenHeld(new ShootSetupCommand(m_flywheelSubsystem, m_hoodSubsystem, () -> FieldLocation.TWOFEET));
+		// .whenHeld(new ShootSetupCommand(m_flywheelSubsystem, m_hoodSubsystem, () ->
+		// FieldLocation.TWOFEET));
 		// new POVButton(m_operatorController, DPad.kUp)
-		// 		.whenHeld(new ShootSetupCommand(m_flywheelSubsystem, m_hoodSubsystem, () -> FieldLocation.INITLINE));
+		// .whenHeld(new ShootSetupCommand(m_flywheelSubsystem, m_hoodSubsystem, () ->
+		// FieldLocation.INITLINE));
 		// new POVButton(m_operatorController, DPad.kRight)
-		// 		.whenHeld(new ShootSetupCommand(m_flywheelSubsystem, m_hoodSubsystem, () -> FieldLocation.CLOSETRENCH));
+		// .whenHeld(new ShootSetupCommand(m_flywheelSubsystem, m_hoodSubsystem, () ->
+		// FieldLocation.CLOSETRENCH));
 		// hood
 		m_hoodSubsystem.setDefaultCommand(
-		new DriveHoodCommand(m_hoodSubsystem, () ->
-		m_operatorController.getRawAxis(Axis.kRightY) * 0.1));
+				new DriveHoodCommand(m_hoodSubsystem, () -> m_operatorController.getRawAxis(Axis.kRightY) * 0.1));
 
-		new JoystickButton(m_operatorController, Button.kOptions).whenPressed(() ->
-		m_hoodSubsystem.resetEncoder());
+		new JoystickButton(m_operatorController, Button.kOptions).whenPressed(() -> m_hoodSubsystem.resetEncoder());
 
-		new JoystickButton(m_operatorController, Button.kRightBumper).whenPressed(new
-		HoodPositionCommand(m_hoodSubsystem, 0));
+		new JoystickButton(m_operatorController, Button.kRightBumper)
+				.whenPressed(new HoodPositionCommand(m_hoodSubsystem, 0));
 		// arm
 		m_armSubsystem.setDefaultCommand(
 				new DriveArmCommand(m_armSubsystem, () -> (m_operatorController.getRawAxis(Axis.kLeftTrigger) + 1) / 2,
@@ -272,6 +272,7 @@ public class RobotContainer {
 	}
 
 	public Command getAutonomousCommand() {
+		System.out.println("let's see what it's saying: " + m_autoChooser.getSelected().toString());
 		return m_autoChooser.getSelected();
 	}
 
@@ -280,23 +281,23 @@ public class RobotContainer {
 	 * follow in AutoNav challenges and Galatic Search challenges
 	 */
 	private void generateAutonomousCommands() {
-		//Hashtable<String, Trajectory> trajectories = new Hashtable<String, Trajectory>();
+		// Hashtable<String, Trajectory> trajectories = new Hashtable<String,
+		// Trajectory>();
 		// File[] files = new File("\\home\\lvuser\\deploy\\paths\\output").listFiles();
 		// create a file that is really a directory
 		// File aDirectory = new File("Robot2021/src/main/deploy/paths");
 		// get a listing of all files in the directory
 		// String[] files = aDirectory.list();
 
-		//will overwriting trajectory cause issues???
-		//String trajectoryJSON = "paths/Slalom.wpilib.json";
 		String trajectoryJSON = "/home/lvuser/deploy/Slalom.wpilib.json";
 		Trajectory trajectory = new Trajectory();
 
 		try {
 			Path trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(trajectoryJSON);
-			trajectory = TrajectoryUtil.fromPathweaverJson(trajectoryPath);
-			m_autoChooser.addOption("Slalom", new TrajectoryFollowCommand(m_driveSubsystem, trajectory));
-			//System.out.println(trajectory.toString());
+			trajectory = TrajectoryUtil.fromPathweaverJson(trajectoryPath);	
+			Transform2d transform =  new Pose2d(0, 0, new Rotation2d()).minus(trajectory.getInitialPose());
+			Trajectory newTrajectory = trajectory.transformBy(transform);	
+			m_autoChooser.addOption("Slalom", new TrajectoryFollowCommand(m_driveSubsystem, newTrajectory));
 		} catch (IOException ex) {
 			DriverStation.reportError("Unable to open trajectory: " + trajectoryJSON, ex.getStackTrace());
 		}
@@ -305,7 +306,9 @@ public class RobotContainer {
 		try {
 			Path trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(trajectoryJSON);
 			trajectory = TrajectoryUtil.fromPathweaverJson(trajectoryPath);
-			m_autoChooser.addOption("Barrel Racing", new TrajectoryFollowCommand(m_driveSubsystem, trajectory));
+			Transform2d transform =  new Pose2d(0, 0, new Rotation2d()).minus(trajectory.getInitialPose());
+			Trajectory newTrajectory = trajectory.transformBy(transform);
+			m_autoChooser.addOption("Barrel Racing", new TrajectoryFollowCommand(m_driveSubsystem, newTrajectory));
 		} catch (IOException ex) {
 			DriverStation.reportError("Unable to open trajectory: " + trajectoryJSON, ex.getStackTrace());
 		}
@@ -314,22 +317,29 @@ public class RobotContainer {
 		try {
 			Path trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(trajectoryJSON);
 			trajectory = TrajectoryUtil.fromPathweaverJson(trajectoryPath);
-			m_autoChooser.addOption("Bounce", new TrajectoryFollowCommand(m_driveSubsystem, trajectory));
+			Transform2d transform =  new Pose2d(0, 0, new Rotation2d()).minus(trajectory.getInitialPose());
+			Trajectory newTrajectory = trajectory.transformBy(transform);
+			m_autoChooser.addOption("Bounce", new TrajectoryFollowCommand(m_driveSubsystem, newTrajectory));
 		} catch (IOException ex) {
 			DriverStation.reportError("Unable to open trajectory: " + trajectoryJSON, ex.getStackTrace());
 		}
 
 		trajectoryJSON = "/home/lvuser/deploy/GalacticSearchABlue.wpilib.json";
 		String trajectoryJSON2 = "/home/lvuser/deploy/GalacticSearchARed.wpilib.json";
-		Trajectory trajectory2 = new Trajectory(); //to be used with galactic search RED
+		Trajectory trajectory2 = new Trajectory(); // to be used with galactic search RED
 
 		try {
 			Path trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(trajectoryJSON);
 			trajectory = TrajectoryUtil.fromPathweaverJson(trajectoryPath);
+			Transform2d transform =  new Pose2d(0, 0, new Rotation2d()).minus(trajectory.getInitialPose());
+			Trajectory newTrajectory1 = trajectory.transformBy(transform);
+
 			Path trajectoryPath2 = Filesystem.getDeployDirectory().toPath().resolve(trajectoryJSON2);
 			trajectory2 = TrajectoryUtil.fromPathweaverJson(trajectoryPath2);
-			m_autoChooser.addOption("Galactic Search A", new GalacticSearch(m_driveSubsystem,
-				m_arduinoSubsystem, m_intakeSubsystem, m_carouselSubsystem, m_armSubsystem, trajectory2, trajectory));
+			Trajectory newTrajectory2 = trajectory.transformBy(transform);
+
+			m_autoChooser.addOption("Galactic Search A", new GalacticSearch(m_driveSubsystem, m_arduinoSubsystem,
+					m_intakeSubsystem, m_carouselSubsystem, m_armSubsystem, newTrajectory2, newTrajectory1));
 		} catch (IOException ex) {
 			DriverStation.reportError("Unable to open trajectory: " + trajectoryJSON, ex.getStackTrace());
 		}
@@ -340,10 +350,15 @@ public class RobotContainer {
 		try {
 			Path trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(trajectoryJSON);
 			trajectory = TrajectoryUtil.fromPathweaverJson(trajectoryPath);
+			Transform2d transform =  new Pose2d(0, 0, new Rotation2d()).minus(trajectory.getInitialPose());
+			Trajectory newTrajectory1 = trajectory.transformBy(transform);
+
 			Path trajectoryPath2 = Filesystem.getDeployDirectory().toPath().resolve(trajectoryJSON2);
 			trajectory2 = TrajectoryUtil.fromPathweaverJson(trajectoryPath2);
-			m_autoChooser.addOption("Galactic Search B", new GalacticSearch(m_driveSubsystem,
-				m_arduinoSubsystem, m_intakeSubsystem, m_carouselSubsystem, m_armSubsystem, trajectory2, trajectory));
+			Trajectory newTrajectory2 = trajectory.transformBy(transform);
+
+			m_autoChooser.addOption("Galactic Search B", new GalacticSearch(m_driveSubsystem, m_arduinoSubsystem,
+					m_intakeSubsystem, m_carouselSubsystem, m_armSubsystem, newTrajectory2, newTrajectory1));
 		} catch (IOException ex) {
 			DriverStation.reportError("Unable to open trajectory: " + trajectoryJSON, ex.getStackTrace());
 		}

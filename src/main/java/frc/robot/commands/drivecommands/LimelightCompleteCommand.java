@@ -78,7 +78,8 @@ public class LimelightCompleteCommand extends CommandBase {
         DifferentialDriveWheelSpeeds wheelSpeeds = DriveConstants.kDriveKinematics
                 .toWheelSpeeds(new ChassisSpeeds(robotTranslationSpeed, 0, robotTurnSpeed));
         
-        // m_driveSubsystem.setWheelSpeeds(wheelSpeeds); //if we need to try this route, then comment out the stuff below
+        // m_driveSubsystem.setWheelSpeeds(wheelSpeeds); //this is what was used last year
+        //if we need to try this route, then comment out the stuff below
 
         double leftVoltage = DriveConstants.kFeedForward.calculate(wheelSpeeds.leftMetersPerSecond);
         double rightVoltage = DriveConstants.kFeedForward.calculate(wheelSpeeds.rightMetersPerSecond);

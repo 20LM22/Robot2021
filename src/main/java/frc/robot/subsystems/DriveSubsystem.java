@@ -15,6 +15,9 @@ import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.ControlType;
 
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
@@ -26,35 +29,45 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DriveConstants;
+import frc.robot.Robot;
 import frc.robot.ShuffleboardLogging;
 
 public class DriveSubsystem extends SubsystemBase implements ShuffleboardLogging {
 
     // removing the followers completely
     private final WPI_TalonSRX m_masterLeft = new WPI_TalonSRX(DriveConstants.kMasterLeftPort);
-    // private final CANSparkMax m_followerLeft = new
-    // CANSparkMax(DriveConstants.kFollowerLeftPort, MotorType.kBrushless);
+    private final CANSparkMax m_followerLeft = new
+    CANSparkMax(DriveConstants.kFollowerLeftPort, MotorType.kBrushless);
 
     private final WPI_TalonSRX m_masterRight = new WPI_TalonSRX(DriveConstants.kMasterRightPort);
-    // private final CANSparkMax m_followerRight = new
-    // CANSparkMax(DriveConstants.kFollowerRightPort,
-    // MotorType.kBrushless);
+    private final CANSparkMax m_followerRight = new
+    CANSparkMax(DriveConstants.kFollowerRightPort,
+    MotorType.kBrushless);
 
     private final AHRS m_gyro = new AHRS(DriveConstants.kGyroPort);
     private final DifferentialDriveOdometry m_odometry = new DifferentialDriveOdometry(
             Rotation2d.fromDegrees(getHeading()));
-
+    private Pose2d m_Pose;
+    private NetworkTableEntry m_RobotXEntry;
+    private NetworkTableEntry m_RobotYEntry;
+    private NetworkTableEntry m_RobotThEntry;
+    private NetworkTable m_Table;
     /**
      * Initializes a new instance of the {@link DriveSubsystem} class.
      */
     public DriveSubsystem() {
 
         // front left Talon
+        m_Table = NetworkTableInstance.getDefault().getTable("odometry");
+        m_RobotXEntry = m_Table.getEntry("robotX");
+        m_RobotYEntry = m_Table.getEntry("robotY");
+        m_RobotThEntry = m_Table.getEntry("robotTh");
+
         m_masterLeft.configFactoryDefault();
         m_masterLeft.setInverted(DriveConstants.kMasterLeftInvert);
         m_masterLeft.setNeutralMode(NeutralMode.Brake);
         m_masterLeft.enableVoltageCompensation(DriveConstants.kEnableVoltageComp);
-        m_masterLeft.configVoltageCompSaturation(DriveConstants.kVoltageComp);
+       // m_masterLeft.configVoltageCompSaturation(DriveConstants.kVoltageComp);
         m_masterLeft.enableCurrentLimit(true);
         m_masterLeft.configPeakCurrentLimit((int) DriveConstants.kPeakCurrentLimit);
         // m_masterLeft.setSecondaryCurrentLimit(DriveConstants.kPeakCurrentLimit,
@@ -65,21 +78,21 @@ public class DriveSubsystem extends SubsystemBase implements ShuffleboardLogging
                 10);
 
         // back left Spark Max
-        // m_followerLeft.restoreFactoryDefaults();
-        // m_followerLeft.setInverted(DriveConstants.kFollowerLeftOppose);
-        // m_followerLeft.setIdleMode(IdleMode.kCoast);
-        // m_followerLeft.enableVoltageCompensation(DriveConstants.kVoltageComp);
-        // m_followerLeft.setSmartCurrentLimit(DriveConstants.kSmartCurrentLimit);
-        // m_followerLeft.setSecondaryCurrentLimit(DriveConstants.kPeakCurrentLimit,
-        // DriveConstants.kPeakCurrentDurationMillis);
-        // m_followerLeft.setOpenLoopRampRate(DriveConstants.kRampRate);
+        m_followerLeft.restoreFactoryDefaults();
+        m_followerLeft.setInverted(DriveConstants.kFollowerLeftOppose);
+        m_followerLeft.setIdleMode(IdleMode.kCoast);
+        m_followerLeft.enableVoltageCompensation(DriveConstants.kVoltageComp);
+        m_followerLeft.setSmartCurrentLimit(DriveConstants.kSmartCurrentLimit);
+        m_followerLeft.setSecondaryCurrentLimit(DriveConstants.kPeakCurrentLimit,
+        DriveConstants.kPeakCurrentDurationMillis);
+        m_followerLeft.setOpenLoopRampRate(DriveConstants.kRampRate);
 
         // front right Talon
         m_masterRight.configFactoryDefault();
         m_masterRight.setInverted(DriveConstants.kMasterRightInvert);
         m_masterRight.setNeutralMode(NeutralMode.Brake);
         m_masterRight.enableVoltageCompensation(DriveConstants.kEnableVoltageComp);
-        m_masterRight.configVoltageCompSaturation(DriveConstants.kVoltageComp);
+      //  m_masterRight.configVoltageCompSaturation(DriveConstants.kVoltageComp);
         m_masterRight.enableCurrentLimit(true);
         m_masterRight.configPeakCurrentLimit((int) DriveConstants.kPeakCurrentLimit);
         // m_masterRight.setSecondaryCurrentLimit(DriveConstants.kPeakCurrentLimit,
@@ -90,14 +103,14 @@ public class DriveSubsystem extends SubsystemBase implements ShuffleboardLogging
                 10);
 
         // // back right Spark Max
-        // m_followerRight.restoreFactoryDefaults();
-        // m_followerLeft.setInverted(DriveConstants.kFollowerRightOppose);
-        // m_followerRight.setIdleMode(IdleMode.kCoast);
-        // m_followerRight.enableVoltageCompensation(DriveConstants.kVoltageComp);
-        // m_followerRight.setSmartCurrentLimit(DriveConstants.kSmartCurrentLimit);
-        // m_followerRight.setSecondaryCurrentLimit(DriveConstants.kPeakCurrentLimit,
-        // DriveConstants.kPeakCurrentDurationMillis);
-        // m_followerRight.setOpenLoopRampRate(DriveConstants.kRampRate);
+        m_followerRight.restoreFactoryDefaults();
+        m_followerRight.setInverted(DriveConstants.kFollowerRightOppose);
+        m_followerRight.setIdleMode(IdleMode.kCoast);
+        m_followerRight.enableVoltageCompensation(DriveConstants.kVoltageComp);
+        m_followerRight.setSmartCurrentLimit(DriveConstants.kSmartCurrentLimit);
+        m_followerRight.setSecondaryCurrentLimit(DriveConstants.kPeakCurrentLimit,
+        DriveConstants.kPeakCurrentDurationMillis);
+        m_followerRight.setOpenLoopRampRate(DriveConstants.kRampRate);
 
         /* Config the Velocity closed loop gains in slot0 */
         // _talon.config_kF(Constants.kPIDLoopIdx, Constants.kGains_Velocit.kF,
@@ -109,30 +122,30 @@ public class DriveSubsystem extends SubsystemBase implements ShuffleboardLogging
         // _talon.config_kD(Constants.kPIDLoopIdx, Constants.kGains_Velocit.kD,
         // Constants.kTimeoutMs)
 
-        // Potentially needed for PID control - not sure though
-        m_masterLeft.configNominalOutputForward(0);
-        m_masterLeft.configNominalOutputReverse(0);
-        m_masterLeft.configPeakOutputForward(1);
-        m_masterLeft.configPeakOutputReverse(-1);
+        // // Potentially needed for PID control - not sure though, yeah might need to turn that feature off...
+        // m_masterLeft.configNominalOutputForward(0);
+        // m_masterLeft.configNominalOutputReverse(0);
+        // m_masterLeft.configPeakOutputForward(1);
+        // m_masterLeft.configPeakOutputReverse(-1);
 
-        m_masterRight.configNominalOutputForward(0);
-        m_masterRight.configNominalOutputReverse(0);
-        m_masterRight.configPeakOutputForward(1);
-        m_masterRight.configPeakOutputReverse(-1);
+        // m_masterRight.configNominalOutputForward(0);
+        // m_masterRight.configNominalOutputReverse(0);
+        // m_masterRight.configPeakOutputForward(1);
+        // m_masterRight.configPeakOutputReverse(-1);
 
         // Sets up the PID controller within the Talons
         //update 2/9: might need to get rid of this pid stuff - potentially being handled by ramsete
-        m_masterLeft.config_kP(DriveConstants.kPIDLoopIdx, DriveConstants.kP);
-        m_masterLeft.config_kI(DriveConstants.kPIDLoopIdx, DriveConstants.kI);
-        m_masterLeft.config_IntegralZone(DriveConstants.kPIDLoopIdx, (int) DriveConstants.kIz);
-        m_masterLeft.config_kD(DriveConstants.kPIDLoopIdx, DriveConstants.kD);
-        m_masterLeft.config_kF(DriveConstants.kPIDLoopIdx, DriveConstants.kFF);
+        // m_masterLeft.config_kP(DriveConstants.kPIDLoopIdx, DriveConstants.kP);
+        // m_masterLeft.config_kI(DriveConstants.kPIDLoopIdx, DriveConstants.kI);
+        // m_masterLeft.config_IntegralZone(DriveConstants.kPIDLoopIdx, (int) DriveConstants.kIz);
+        // m_masterLeft.config_kD(DriveConstants.kPIDLoopIdx, DriveConstants.kD);
+        // m_masterLeft.config_kF(DriveConstants.kPIDLoopIdx, DriveConstants.kFF);
 
-        m_masterRight.config_kP(DriveConstants.kPIDLoopIdx2, DriveConstants.kP);
-        m_masterRight.config_kI(DriveConstants.kPIDLoopIdx2, DriveConstants.kI);
-        m_masterRight.config_IntegralZone(DriveConstants.kPIDLoopIdx2, (int) DriveConstants.kIz);
-        m_masterRight.config_kD(DriveConstants.kPIDLoopIdx2, DriveConstants.kD);
-        m_masterRight.config_kF(DriveConstants.kPIDLoopIdx2, DriveConstants.kFF);
+        // m_masterRight.config_kP(DriveConstants.kPIDLoopIdx2, DriveConstants.kP);
+        // m_masterRight.config_kI(DriveConstants.kPIDLoopIdx2, DriveConstants.kI);
+        // m_masterRight.config_IntegralZone(DriveConstants.kPIDLoopIdx2, (int) DriveConstants.kIz);
+        // m_masterRight.config_kD(DriveConstants.kPIDLoopIdx2, DriveConstants.kD);
+        // m_masterRight.config_kF(DriveConstants.kPIDLoopIdx2, DriveConstants.kFF);
 
         // setting up the encoders
         m_masterRight.setSelectedSensorPosition(0);
@@ -143,7 +156,7 @@ public class DriveSubsystem extends SubsystemBase implements ShuffleboardLogging
         m_masterRight.setSensorPhase(DriveConstants.kRightSensorPhase); // then it can be changed here accordingly
         //**update as of 2/9: when last checked, the sensors were in phase so they are good
 
-        m_gyro.calibrate(); //this might become an issue
+      //  m_gyro.calibrate(); //TODO this might become an issue - maybe make an accessor method to be called from the robot container on startup?
 
         resetOdometry(new Pose2d(0, 0, new Rotation2d()));
     }
@@ -155,16 +168,20 @@ public class DriveSubsystem extends SubsystemBase implements ShuffleboardLogging
         SmartDashboard.putNumber("Left wheel", getLeftEncoderPosition());
         SmartDashboard.putNumber("Right wheel", getRightEncoderPosition());
         SmartDashboard.putNumber("Heading", m_odometry.getPoseMeters().getRotation().getDegrees());
-        m_odometry.update(Rotation2d.fromDegrees(getHeading()), getLeftEncoderPosition(), getRightEncoderPosition());
+        m_Pose = m_odometry.update(Rotation2d.fromDegrees(getHeading()), getLeftEncoderPosition(), getRightEncoderPosition());
+    //   NetworkTable table = Robot.table;
+        m_RobotThEntry.setDouble(m_Pose.getRotation().getRadians());
+        m_RobotXEntry.setDouble(m_Pose.getX());
+        m_RobotYEntry.setDouble(m_Pose.getY());
     }
 
     /**
      * @return The left encoder position (meters)
      */
     public double getLeftEncoderPosition() {
-        // return m_masterLeft.getSelectedSensorPosition() *
-        // DriveConstants.kEncoderPositionConversionFactor;
-        return m_masterLeft.getSelectedSensorPosition() * DriveConstants.kEncoderTestPositionFactor;
+        return -m_masterLeft.getSelectedSensorPosition() * DriveConstants.kEncoderPositionConversionFactor;
+       //this was some stuff that was running on the l-board specifically
+       // return m_masterLeft.getSelectedSensorPosition() * DriveConstants.kEncoderTestPositionFactor;
 
     }
 
@@ -172,7 +189,11 @@ public class DriveSubsystem extends SubsystemBase implements ShuffleboardLogging
      * @return The right encoder position (meters)
      */
     public double getRightEncoderPosition() {
-        return m_masterRight.getSelectedSensorPosition() * DriveConstants.kEncoderPositionConversionFactor;
+        return m_masterRight.getSelectedSensorPosition() * DriveConstants.kEncoderPositionConversionFactor; //TODO either this one or the left might need to be negated!!!
+    }
+
+    public double getTest() {
+        return m_masterLeft.getSelectedSensorVelocity();
     }
 
     /**
@@ -186,14 +207,14 @@ public class DriveSubsystem extends SubsystemBase implements ShuffleboardLogging
      * @return The velocity of the left encoder (meters/s)
      */
     public double getLeftEncoderVelocity() {
-        return m_masterLeft.getSelectedSensorVelocity() * DriveConstants.kEncoderVelocityConversionFactor;
+        return -m_masterLeft.getSelectedSensorVelocity() * DriveConstants.kEncoderVelocityConversionFactor;
     }
 
     /**
      * @return The velocity of the right encoder (meters/s)
      */
     public double getRightEncoderVelocity() {
-        return m_masterRight.getSelectedSensorVelocity() * DriveConstants.kEncoderVelocityConversionFactor;
+       return m_masterRight.getSelectedSensorVelocity() * DriveConstants.kEncoderVelocityConversionFactor;
 
     }
 
@@ -234,7 +255,7 @@ public class DriveSubsystem extends SubsystemBase implements ShuffleboardLogging
     }
 
     /**
-     * @param pose Pose to set the robot to
+     * @param pose Pose to set the robot to 
      */
     public void resetOdometry(Pose2d pose) {
         resetEncoders();
@@ -258,16 +279,22 @@ public class DriveSubsystem extends SubsystemBase implements ShuffleboardLogging
     public void tankDrive(double leftSpeed, double rightSpeed) {
         m_masterLeft.set(ControlMode.PercentOutput, leftSpeed);
         m_masterRight.set(ControlMode.PercentOutput, rightSpeed);
-        m_masterLeft.feed(); //potentially comment these out if they are not working
-        m_masterRight.feed();
+     //   m_followerLeft.set(m_masterLeft.getMotorOutputPercent());
+    //    m_followerRight.set(m_masterRight.getMotorOutputPercent());
+       // m_masterLeft.feed(); //potentially comment these out if they are not working
+       // m_masterRight.feed();
 
-        // System.out.println("angle of gyro: " + getHeading());
-        // System.out.println("distance traveled: " + getLeftEncoderPosition());
+        //System.out.println("angle of gyro: " + getHeading());
+        System.out.println("reported velocity LEFT: " + getLeftEncoderVelocity());
+        System.out.println("reported velocity RIGHT: " + getRightEncoderVelocity());
+        System.out.println("the pose of the robot: " + getPose().toString());
     }
 
     public void tankDriveVolts(double leftVolts, double rightVolts) {
         m_masterLeft.setVoltage(leftVolts);
         m_masterRight.setVoltage(rightVolts);
+      //  m_followerLeft.setVoltage(leftVolts);
+      //  m_followerRight.setVoltage(rightVolts);
         m_masterLeft.feed();
         m_masterRight.feed();
     }
