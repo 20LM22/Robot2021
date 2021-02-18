@@ -303,10 +303,10 @@ public class DriveSubsystem extends SubsystemBase implements ShuffleboardLogging
         // Unsure whether this will use the PID within the Talons to set a target
         // velocity
 
-        double targetVelocity_UnitsPer100msLEFT = wheelSpeeds.leftMetersPerSecond * 1
-                / DriveConstants.kEncoderVelocityConversionFactor;
-        double targetVelocity_UnitsPer100msRIGHT = wheelSpeeds.rightMetersPerSecond * 1
-                / DriveConstants.kEncoderVelocityConversionFactor;
+        double targetVelocity_UnitsPer100msLEFT = wheelSpeeds.leftMetersPerSecond * (1
+                / DriveConstants.kEncoderVelocityConversionFactor);
+        double targetVelocity_UnitsPer100msRIGHT = wheelSpeeds.rightMetersPerSecond * (1
+                / DriveConstants.kEncoderVelocityConversionFactor);
 
         m_masterLeft.set(ControlMode.Velocity, targetVelocity_UnitsPer100msLEFT);
         m_masterRight.set(ControlMode.Velocity, targetVelocity_UnitsPer100msRIGHT);

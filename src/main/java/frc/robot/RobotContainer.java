@@ -40,7 +40,6 @@ import frc.robot.commands.armcommands.BounceArmCommand;
 import frc.robot.commands.armcommands.DriveArmCommand;
 import frc.robot.commands.armcommands.ExtendArmCommand;
 import frc.robot.commands.armcommands.RetractArmCommand;
-import frc.robot.commands.autocommands.GalacticSearch;
 import frc.robot.commands.autocommands.ShootCG;
 import frc.robot.commands.autocommands.ShootForwardCG;
 import frc.robot.commands.carouselcommands.AutoSpeedCarouselCommand;
@@ -50,6 +49,7 @@ import frc.robot.commands.climbercommands.DriveScissorsCommand;
 import frc.robot.commands.drivecommands.ArcadeDriveCommand;
 import frc.robot.commands.drivecommands.BackupCommand;
 import frc.robot.commands.drivecommands.LimelightTurnCommand;
+import frc.robot.commands.drivecommands.PixyGalacticCommand;
 import frc.robot.commands.drivecommands.PixyTargetCommand;
 import frc.robot.commands.drivecommands.TrajectoryFollowCommand;
 import frc.robot.commands.feedercommands.AutoFeederCommand;
@@ -332,14 +332,15 @@ public class RobotContainer {
 			Path trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(trajectoryJSON);
 			trajectory = TrajectoryUtil.fromPathweaverJson(trajectoryPath);
 			Transform2d transform =  new Pose2d(0, 0, new Rotation2d()).minus(trajectory.getInitialPose());
-			Trajectory newTrajectory1 = trajectory.transformBy(transform);
+			Trajectory newTrajectory1 = trajectory.transformBy(transform); //BLUE
 
 			Path trajectoryPath2 = Filesystem.getDeployDirectory().toPath().resolve(trajectoryJSON2);
 			trajectory2 = TrajectoryUtil.fromPathweaverJson(trajectoryPath2);
-			Trajectory newTrajectory2 = trajectory.transformBy(transform);
+			Trajectory newTrajectory2 = trajectory2.transformBy(transform); //RED
 
-			m_autoChooser.addOption("Galactic Search A", new GalacticSearch(m_driveSubsystem, m_arduinoSubsystem,
-					m_intakeSubsystem, m_carouselSubsystem, m_armSubsystem, newTrajectory2, newTrajectory1));
+			m_autoChooser.addOption("Galactic Search A", new PixyGalacticCommand(m_arduinoSubsystem, m_driveSubsystem, newTrajectory1, newTrajectory2).deadlineWith(new IntakeCommand(m_intakeSubsystem),
+			new RunCarouselCommand(m_carouselSubsystem, CarouselConstants.kIntakeVelocity), new BounceArmCommand(m_armSubsystem)));
+
 		} catch (IOException ex) {
 			DriverStation.reportError("Unable to open trajectory: " + trajectoryJSON, ex.getStackTrace());
 		}
@@ -351,14 +352,15 @@ public class RobotContainer {
 			Path trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(trajectoryJSON);
 			trajectory = TrajectoryUtil.fromPathweaverJson(trajectoryPath);
 			Transform2d transform =  new Pose2d(0, 0, new Rotation2d()).minus(trajectory.getInitialPose());
-			Trajectory newTrajectory1 = trajectory.transformBy(transform);
+			Trajectory newTrajectory1 = trajectory.transformBy(transform); //BLUE
 
 			Path trajectoryPath2 = Filesystem.getDeployDirectory().toPath().resolve(trajectoryJSON2);
 			trajectory2 = TrajectoryUtil.fromPathweaverJson(trajectoryPath2);
-			Trajectory newTrajectory2 = trajectory.transformBy(transform);
+			Trajectory newTrajectory2 = trajectory2.transformBy(transform); //RED
 
-			m_autoChooser.addOption("Galactic Search B", new GalacticSearch(m_driveSubsystem, m_arduinoSubsystem,
-					m_intakeSubsystem, m_carouselSubsystem, m_armSubsystem, newTrajectory2, newTrajectory1));
+			m_autoChooser.addOption("Galactic Search B", new PixyGalacticCommand(m_arduinoSubsystem, m_driveSubsystem, newTrajectory1, newTrajectory2).deadlineWith(new IntakeCommand(m_intakeSubsystem),
+			new RunCarouselCommand(m_carouselSubsystem, CarouselConstants.kIntakeVelocity), new BounceArmCommand(m_armSubsystem)));
+
 		} catch (IOException ex) {
 			DriverStation.reportError("Unable to open trajectory: " + trajectoryJSON, ex.getStackTrace());
 		}
