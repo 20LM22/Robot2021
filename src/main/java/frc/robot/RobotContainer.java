@@ -93,11 +93,18 @@ public class RobotContainer {
 			m_intakeSubsystem, m_limelightSubsystem };
 
 	public RobotContainer() {
-		// m_autoChooser.addOption("Test path",
-		// 		new TrajectoryFollowCommand(m_driveSubsystem,
-		// 				TrajectoryGenerator.generateTrajectory(new Pose2d(0, 0, new Rotation2d()),
-		// 						List.of(new Translation2d(.5, 0)), new Pose2d(1, 0, new Rotation2d()),
-		// 						DriveConstants.kTrajectoryConfig)));
+		m_autoChooser.addOption("Test path",
+				new TrajectoryFollowCommand(m_driveSubsystem,
+						TrajectoryGenerator.generateTrajectory(new Pose2d(0, 0, new Rotation2d()), List.of(new Translation2d(1.433322, 0.452628), 
+						new Translation2d(2.306828, 1.867154), new Translation2d(3.838448, 1.867154), new Translation2d(5.927852, 3.809746), 
+						new Translation2d(8.586978, 2.942082), new Translation2d(9.813036, 1.037336), new Translation2d(11.491468, 0.188468),
+						new Translation2d(13.151104, 1.26365), new Translation2d(12.868148, 2.791206), new Translation2d(10.944606, 3.243834),
+						new Translation2d(10.378694, 2.960878), new Translation2d(10.15238, 2.847848), new Translation2d(9.66216, 1.829308),
+						new Translation2d(9.134094, 0.735584), new Translation2d(7.832598, 0.018796), new Translation2d(5.852414, 0.018796),
+						new Translation2d(3.551428, 0.150876), new Translation2d(2.589784, 0.75438), new Translation2d(1.326134, 2.13106),
+						new Translation2d(0.72263, 2.810002)),
+						new Pose2d(-0.974852, 3.130804, new Rotation2d(Math.PI)), DriveConstants.kTrajectoryConfig))); //based on data from Andrew's spline program
+
 		m_limelightSubsystem.turnOffLight();
 		m_autoChooser.addOption("Auto", new ShootForwardCG(m_driveSubsystem, m_flywheelSubsystem, m_hoodSubsystem,
 				m_feederSubsystem, m_carouselSubsystem));
