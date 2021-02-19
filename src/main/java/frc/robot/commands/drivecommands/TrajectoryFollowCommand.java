@@ -2,15 +2,12 @@ package frc.robot.commands.drivecommands;
 
 import edu.wpi.first.wpilibj.controller.PIDController;
 import edu.wpi.first.wpilibj.controller.RamseteController;
-import edu.wpi.first.wpilibj.geometry.Pose2d;
-import edu.wpi.first.wpilibj.geometry.Rotation2d;
-//import edu.wpi.first.wpilibj.kinematics.DifferentialDriveWheelSpeeds;
 import edu.wpi.first.wpilibj.trajectory.Trajectory;
 import edu.wpi.first.wpilibj2.command.RamseteCommand;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.subsystems.DriveSubsystem;
 
-public class TrajectoryFollowCommand extends RamseteCommand { //extends RamseteCommand
+public class TrajectoryFollowCommand extends RamseteCommand {
 
     private final DriveSubsystem m_driveSubsystem;
 

@@ -15,7 +15,7 @@
 // import frc.robot.subsystems.DriveSubsystem;
 // import frc.robot.subsystems.IntakeSubsystem;
 
-// public class GalacticSearch extends CommandBase {
+// public class GalacticSearch extends CommandBase { //not using this command --> see pixy galatic command
 
 //     private final DriveSubsystem m_driveSubsystem;
 //     private final ArduinoSubsystem m_arduinoSubsystem;

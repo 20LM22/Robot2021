@@ -112,16 +112,6 @@ public class DriveSubsystem extends SubsystemBase implements ShuffleboardLogging
         DriveConstants.kPeakCurrentDurationMillis);
         m_followerRight.setOpenLoopRampRate(DriveConstants.kRampRate);
 
-        /* Config the Velocity closed loop gains in slot0 */
-        // _talon.config_kF(Constants.kPIDLoopIdx, Constants.kGains_Velocit.kF,
-        // Constants.kTimeoutMs);
-        // _talon.config_kP(Constants.kPIDLoopIdx, Constants.kGains_Velocit.kP,
-        // Constants.kTimeoutMs);
-        // _talon.config_kI(Constants.kPIDLoopIdx, Constants.kGains_Velocit.kI,
-        // Constants.kTimeoutMs);
-        // _talon.config_kD(Constants.kPIDLoopIdx, Constants.kGains_Velocit.kD,
-        // Constants.kTimeoutMs)
-
         // // Potentially needed for PID control - not sure though, yeah might need to turn that feature off...
         // m_masterLeft.configNominalOutputForward(0);
         // m_masterLeft.configNominalOutputReverse(0);
@@ -180,9 +170,6 @@ public class DriveSubsystem extends SubsystemBase implements ShuffleboardLogging
      */
     public double getLeftEncoderPosition() {
         return -m_masterLeft.getSelectedSensorPosition() * DriveConstants.kEncoderPositionConversionFactor;
-       //this was some stuff that was running on the l-board specifically
-       // return m_masterLeft.getSelectedSensorPosition() * DriveConstants.kEncoderTestPositionFactor;
-
     }
 
     /**

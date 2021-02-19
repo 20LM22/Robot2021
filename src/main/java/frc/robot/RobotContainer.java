@@ -187,19 +187,19 @@ public class RobotContainer {
 				.whenHeld(new RunCarouselCommand(m_carouselSubsystem, CarouselConstants.kJostleVelocity));
 		// Hood and flywheel override
 		new POVButton(m_operatorController, DPad.kDown).whenHeld(new ParallelCommandGroup(
-				new ShootSetupCommand(m_flywheelSubsystem, m_hoodSubsystem, () -> FieldLocation.WALL), // WALL
+				new ShootSetupCommand(m_flywheelSubsystem, m_hoodSubsystem, () -> FieldLocation.YELLOW), // WALL
 				new AutoFeederCommand(m_feederSubsystem, m_carouselSubsystem::atOpenSpace,
 						m_flywheelSubsystem::atSetpoint)));
 		new POVButton(m_operatorController, DPad.kLeft).whenHeld(new ParallelCommandGroup(
-				new ShootSetupCommand(m_flywheelSubsystem, m_hoodSubsystem, () -> FieldLocation.INITLINE), // INITLINE
+				new ShootSetupCommand(m_flywheelSubsystem, m_hoodSubsystem, () -> FieldLocation.GREEN), // INITLINE
 				new AutoFeederCommand(m_feederSubsystem, m_carouselSubsystem::atOpenSpace,
 						m_flywheelSubsystem::atSetpoint)));
 		new POVButton(m_operatorController, DPad.kUp).whenHeld(new ParallelCommandGroup(
-				new ShootSetupCommand(m_flywheelSubsystem, m_hoodSubsystem, () -> FieldLocation.CLOSETRENCH), // CLOSETRENCH
+				new ShootSetupCommand(m_flywheelSubsystem, m_hoodSubsystem, () -> FieldLocation.RED), // CLOSETRENCH
 				new AutoFeederCommand(m_feederSubsystem, m_carouselSubsystem::atOpenSpace,
 						m_flywheelSubsystem::atSetpoint)));
 		new POVButton(m_operatorController, DPad.kRight).whenHeld(new ParallelCommandGroup(
-				new ShootSetupCommand(m_flywheelSubsystem, m_hoodSubsystem, () -> FieldLocation.FARTWRENCH), // FARTWRENCH
+				new ShootSetupCommand(m_flywheelSubsystem, m_hoodSubsystem, () -> FieldLocation.BLUE), // FARTWRENCH
 				new AutoFeederCommand(m_feederSubsystem, m_carouselSubsystem::atOpenSpace,
 						m_flywheelSubsystem::atSetpoint)));
 		// Zero hood encoder
