@@ -46,9 +46,8 @@ public class LimelightTurnCommand extends CommandBase {
      * Update the motor outputs
      */
     public void execute() {
-
         
-        double robotTurnSpeed = m_turnController.calculate(20); //m_limelightSubsystem.getXAngle()
+        double robotTurnSpeed = m_turnController.calculate(m_limelightSubsystem.getXAngle()); //m_limelightSubsystem.getXAngle()
         DifferentialDriveWheelSpeeds wheelSpeeds = DriveConstants.kDriveKinematics
                 .toWheelSpeeds(new ChassisSpeeds(0, 0, robotTurnSpeed));
       //  m_driveSubsystem.setWheelSpeeds(wheelSpeeds);

@@ -8,8 +8,6 @@ import com.ctre.phoenix.motorcontrol.TalonSRXFeedbackDevice;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.kauailabs.navx.frc.AHRS;
-import com.revrobotics.CANEncoder;
-import com.revrobotics.CANPIDController;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
@@ -18,7 +16,6 @@ import com.revrobotics.ControlType;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.NetworkTableEntry;
-import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.kinematics.DifferentialDriveOdometry;
@@ -29,12 +26,10 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DriveConstants;
-import frc.robot.Robot;
 import frc.robot.ShuffleboardLogging;
 
 public class DriveSubsystem extends SubsystemBase implements ShuffleboardLogging {
 
-    // removing the followers completely
     private final WPI_TalonSRX m_masterLeft = new WPI_TalonSRX(DriveConstants.kMasterLeftPort);
     private final CANSparkMax m_followerLeft = new
     CANSparkMax(DriveConstants.kFollowerLeftPort, MotorType.kBrushless);
@@ -52,6 +47,7 @@ public class DriveSubsystem extends SubsystemBase implements ShuffleboardLogging
     private NetworkTableEntry m_RobotYEntry;
     private NetworkTableEntry m_RobotThEntry;
     private NetworkTable m_Table;
+
     /**
      * Initializes a new instance of the {@link DriveSubsystem} class.
      */
@@ -179,10 +175,6 @@ public class DriveSubsystem extends SubsystemBase implements ShuffleboardLogging
         return m_masterRight.getSelectedSensorPosition() * DriveConstants.kEncoderPositionConversionFactor; //TODO either this one or the left might need to be negated!!!
     }
 
-    public double getTest() {
-        return m_masterLeft.getSelectedSensorVelocity();
-    }
-
     /**
      * @return The average encoder distance of both encoders (meters)
      */
@@ -266,17 +258,20 @@ public class DriveSubsystem extends SubsystemBase implements ShuffleboardLogging
     public void tankDrive(double leftSpeed, double rightSpeed) {
         m_masterLeft.set(ControlMode.PercentOutput, leftSpeed);
         m_masterRight.set(ControlMode.PercentOutput, rightSpeed);
-     //   m_followerLeft.set(m_masterLeft.getMotorOutputPercent());
-    //    m_followerRight.set(m_masterRight.getMotorOutputPercent());
-       // m_masterLeft.feed(); //potentially comment these out if they are not working
-       // m_masterRight.feed();
+        m_followerLeft.set(m_masterLeft.getMotorOutputPercent());
+        m_followerRight.set(m_masterRight.getMotorOutputPercent());
 
-        //System.out.println("angle of gyro: " + getHeading());
-        System.out.println("reported velocity LEFT: " + getLeftEncoderVelocity());
-        System.out.println("reported velocity RIGHT: " + getRightEncoderVelocity());
-        System.out.println("the pose of the robot: " + getPose().toString());
+        // System.out.println("angle of gyro: " + getHeading());
+        // System.out.println("reported velocity LEFT: " + getLeftEncoderVelocity());
+        // System.out.println("reported velocity RIGHT: " + getRightEncoderVelocity());
+        // System.out.println("the pose of the robot: " + getPose().toString());
     }
 
+
+    /**
+     * @param leftVolts  Left motors percent output
+     * @param rightVolts Right motors percent output
+     */
     public void tankDriveVolts(double leftVolts, double rightVolts) {
         m_masterLeft.setVoltage(leftVolts);
         m_masterRight.setVoltage(rightVolts);
@@ -285,6 +280,11 @@ public class DriveSubsystem extends SubsystemBase implements ShuffleboardLogging
         m_masterLeft.feed();
         m_masterRight.feed();
     }
+
+    /**
+     * 
+     * @param wheelSpeeds Left and right wheel speeds to be driven (contained in one variable)
+     */
 
     public void setWheelSpeeds(DifferentialDriveWheelSpeeds wheelSpeeds) {
         // Unsure whether this will use the PID within the Talons to set a target

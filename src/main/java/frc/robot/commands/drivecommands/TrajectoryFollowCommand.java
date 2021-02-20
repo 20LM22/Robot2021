@@ -41,7 +41,7 @@ public class TrajectoryFollowCommand extends RamseteCommand {
       // m_trajectory = trajectory;
      //  m_driveSubsystem.resetOdometry(trajectory.getInitialPose());
        //System.out.println("trajectory initial pose: " + trajectory.getInitialPose().toString());
-       //System.out.println("robot pose" + m_driveSubsystem.getPose().toString());
+       System.out.println("robot pose" + m_driveSubsystem.getPose().toString());
         // m_driveSubsystem.resetOdometry(new Pose2d(0, 0, new Rotation2d()));
         // System.out.println("here");
         // m_driveSubsystem.resetOdometry(pose);

@@ -12,7 +12,7 @@ public class PixyGalacticCommand extends SequentialCommandGroup {
     private final Trajectory m_trajectory;
 
     // TODO- change values here
-    double aredx = 103;
+    double aredx = 133;
     double abluex = 200;
     double bredx = 100;
     double bbluex = 180;

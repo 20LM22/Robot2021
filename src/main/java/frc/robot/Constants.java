@@ -202,20 +202,7 @@ public final class Constants {
 		public static final double kGearRatio = 8.18;
 
 		public static final double kPDriveVel = 2.6; //.266
-		
-		//public static final double kRotationalToTangentialRatio = kGearRatio * Math.PI * kWheelDiameterMeters;
 
-		// public static final double ksVolts = .77;
-		// public static final double kvVoltSecondsPerMeter = 5.84;
-		// public static final double kaVoltSecondsSquaredPerMeter = .627;
-		// public static final double kPDriveVel = 1.69;
-		// public static final double kTrackwidthMeters = 0.713288;
-		// public static final double kMaxSpeedMetersPerSecond = 2;
-		// public static final double kMaxAccelerationMetersPerSecondSquared = .6;
-		// public static final double kMaxRotSpeedMetersPerSecond = 2;
-		// public static final double kRamseteB = 2;
-		// public static final double kRamseteZeta = .7;
-		// public static final double kWheelDiameterMeters = .1524;
 		// public static final double kEncoderEdgesPerRotation = 4106; //WHAT IS THIS!!!???
 
 		public static final DifferentialDriveKinematics kDriveKinematics = new DifferentialDriveKinematics(
@@ -227,7 +214,12 @@ public final class Constants {
 		public static final TrajectoryConfig kTrajectoryConfig = new TrajectoryConfig(
 				DriveConstants.kMaxSpeedMetersPerSecond, DriveConstants.kMaxAccelerationMetersPerSecondSquared)
 						.setKinematics(DriveConstants.kDriveKinematics)
-						.addConstraint(DriveConstants.kVoltageConstraint);
+						.addConstraint(DriveConstants.kVoltageConstraint); //commented out "final"
+
+		public static final TrajectoryConfig kTrajectoryConfigREVERSED = new TrajectoryConfig(
+				DriveConstants.kMaxSpeedMetersPerSecond, DriveConstants.kMaxAccelerationMetersPerSecondSquared)
+						.setKinematics(DriveConstants.kDriveKinematics)
+						.addConstraint(DriveConstants.kVoltageConstraint); 
 
 		public static final double kTurningMultiplier = .45;
 		public static final double kQuickStopThreshold = .2;
@@ -245,7 +237,7 @@ public final class Constants {
 
 		//new math for the mag encoders; both are from raw units to m and m/s respectively
 		public static final double kEncoderPositionConversionFactor = (1/DriveConstants.kEncoderCounts)
-		 * Math.PI * DriveConstants.kWheelDiameterMeters; //notice that gear ratio is left out
+		 * Math.PI * DriveConstants.kWheelDiameterMeters; //notice that gear ratio is left out --> not sure why that made it work if they are geared though...
 
 		public static final double kEncoderVelocityConversionFactor = (1/DriveConstants.kEncoderCounts) *
 		Math.PI * DriveConstants.kWheelDiameterMeters * 10; //10 gets you from every 100 ms to seconds
@@ -329,10 +321,11 @@ public final class Constants {
 
 	public enum FieldLocation {
 		WALL(2700, 0, 50, 0, 0), TWOFEET(2850, 7, 25, 0, 0), INITLINE(3500, 23, 30, 0, 0),
-		CLOSETRENCH(/* 5500 */4700, /* 37.4 */33.5, 20, 0, 0), FARTWRENCH(6500, 40, 20, 0, 0),
-		RED(4500, 37, 30, 0, 0), BLUE(4500, 34, 30, 0, 0), YELLOW(4500, 30, 30, 0, 0), GREEN(4000, 16, 30, 0, 0)
-		; //green = closest, red = farthest, if ball hit too high, bring the angle up higher
-
+		CLOSETRENCH(/* 5500 */4700, /* 37.4 */33.5, 20, 0, 0), FARTWRENCH(6500, 40, 20, 0, 0), RED(4500, 37, 30, 0, 0),
+		BLUE(4500, 34, 30, 0, 0), YELLOW(4500, 30, 30, 0, 0), GREEN(4000, 16, 30, 0, 0); // green = closest, red =
+																							// farthest, if ball hit too
+																							// high, bring the angle up
+																							// higher
 
 		public final double flywheelSetpoint, hoodSetpoint, carouselSetpoint, distanceGoal, turnGoal;
 

@@ -95,8 +95,10 @@ public class ArmSubsystem extends SubsystemBase implements ShuffleboardLogging {
      * Zero the encoder position
      */
     public void resetEncoder() {
+
         m_encoder.setPosition(0);
         setPosition(0);
+        System.out.println("Encoder values: " + m_encoder.getPosition());
     }
 
     public void configureShuffleboard() {
