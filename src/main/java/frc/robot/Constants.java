@@ -36,6 +36,7 @@ public final class Constants {
 		public static final class MainLEDModes {
 			public static final byte kOff = 0;
 			public static final byte kChasing = 1;
+			public static final byte kRedChasing = 2;
 		}
 
 		public static final class ShooterLEDModes {
@@ -180,6 +181,7 @@ public final class Constants {
 		public static final double kP = .14;//0.198;
 		public static final double kI = 0;
 		public static final double kD = 0;
+
 		public static final double kIz = 0;
 		public static final double kFF = 0;
 		public static final double kMaxOutput = 1;
@@ -194,10 +196,11 @@ public final class Constants {
 		public static final double ksVolts = 1.16; //0.196
 		public static final double kvVoltSecondsPerMeter = 2.68; //2.15
 		public static final double kaVoltSecondsSquaredPerMeter = 1.48; //.53
-		public static final double kTrackwidthMeters = .7815245428457417; //7815245428457417 12.06096414412454
-		public static final double kMaxSpeedMetersPerSecond = 1; //12.089982745473632
-		public static final double kMaxAccelerationMetersPerSecondSquared = .5;
-		public static final double kMaxRotSpeedMetersPerSecond = 1;
+		public static final double kTrackwidthMeters = .7815245428457417; //12.06096414412454
+		public static final double kMaxSpeedMetersPerSecond = 1.75; //TODO this must be increased to increase the speed of autos, increment slowly --> it was 2.25 m/s
+		//TODO might need to make a new set of maxes + configs to handle the motion of picking up a ball - so for the auto challenges, make the speed 2.25
+		public static final double kMaxAccelerationMetersPerSecondSquared = .65; //TODO this could be changed to increase speed of autos --> it was 1.0 m/s^2, for the auto nav make it 1
+		public static final double kMaxRotSpeedMetersPerSecond = 1.2;
 		public static final double kWheelDiameterMeters = Units.inchesToMeters(6);
 		public static final double kGearRatio = 8.18;
 
@@ -211,12 +214,13 @@ public final class Constants {
 				DriveConstants.kvVoltSecondsPerMeter, DriveConstants.kaVoltSecondsSquaredPerMeter);
 		public static final DifferentialDriveVoltageConstraint kVoltageConstraint = new DifferentialDriveVoltageConstraint(
 				DriveConstants.kFeedForward, DriveConstants.kDriveKinematics, 10);
+
 		public static final TrajectoryConfig kTrajectoryConfig = new TrajectoryConfig(
 				DriveConstants.kMaxSpeedMetersPerSecond, DriveConstants.kMaxAccelerationMetersPerSecondSquared)
 						.setKinematics(DriveConstants.kDriveKinematics)
-						.addConstraint(DriveConstants.kVoltageConstraint); //commented out "final"
+						.addConstraint(DriveConstants.kVoltageConstraint);
 
-		public static final TrajectoryConfig kTrajectoryConfigREVERSED = new TrajectoryConfig(
+		public static final TrajectoryConfig kTrajectoryConfigREVERSED = new TrajectoryConfig( //this config is reversed when running parts of the bounce path
 				DriveConstants.kMaxSpeedMetersPerSecond, DriveConstants.kMaxAccelerationMetersPerSecondSquared)
 						.setKinematics(DriveConstants.kDriveKinematics)
 						.addConstraint(DriveConstants.kVoltageConstraint); 
@@ -302,9 +306,9 @@ public final class Constants {
 		public static final double kDisP = .016;
 		public static final double kDisI = 0;
 		public static final double kDisD = 0;
-		public static final double kTurnP = 0.2;
+		public static final double kTurnP = 0.4;//0.2;
 		public static final double kTurnI = 0.0000;
-		public static final double kTurnD = 0.01;
+		public static final double kTurnD = 0.03;//0.01;
 		public static final double kTurnTolerance = .04;
 		public static final double kDistanceTolerance = .1;
 		public static final double kCameraHeight = 27.6;
@@ -321,8 +325,8 @@ public final class Constants {
 
 	public enum FieldLocation {
 		WALL(2700, 0, 50, 0, 0), TWOFEET(2850, 7, 25, 0, 0), INITLINE(3500, 23, 30, 0, 0),
-		CLOSETRENCH(/* 5500 */4700, /* 37.4 */33.5, 20, 0, 0), FARTWRENCH(6500, 40, 20, 0, 0), RED(4500, 37, 30, 0, 0),
-		BLUE(4500, 34, 30, 0, 0), YELLOW(4500, 30, 30, 0, 0), GREEN(4000, 16, 30, 0, 0); // green = closest, red =
+		CLOSETRENCH(/* 5500 */4700, /* 37.4 */33.5, 20, 0, 0), FARTWRENCH(6500, 40, 20, 0, 0), RED(4500, 36, 30, 0, 0),
+		BLUE(4500, 35, 30, 0, 0), YELLOW(4250, 28, 30, 0, 0), GREEN(4000, 19, 30, 0, 0); // green = closest, red =
 																							// farthest, if ball hit too
 																							// high, bring the angle up
 																							// higher

@@ -50,11 +50,12 @@ public class LimelightTurnCommand extends CommandBase {
         double robotTurnSpeed = m_turnController.calculate(m_limelightSubsystem.getXAngle()); //m_limelightSubsystem.getXAngle()
         DifferentialDriveWheelSpeeds wheelSpeeds = DriveConstants.kDriveKinematics
                 .toWheelSpeeds(new ChassisSpeeds(0, 0, robotTurnSpeed));
-      //  m_driveSubsystem.setWheelSpeeds(wheelSpeeds);
+        //m_driveSubsystem.setWheelSpeeds(wheelSpeeds);
 
         double leftVoltage = DriveConstants.kFeedForward.calculate(wheelSpeeds.leftMetersPerSecond);
         double rightVoltage = DriveConstants.kFeedForward.calculate(wheelSpeeds.rightMetersPerSecond);
         m_driveSubsystem.tankDriveVolts(leftVoltage, rightVoltage);
+        //TODO if tuning the pid based on just the talons doesn't work, could write a separate method to handle voltages with spark maxes
     }
 
     /**
@@ -66,3 +67,25 @@ public class LimelightTurnCommand extends CommandBase {
     }
 
 }
+
+// float Kp = -0.1f; //try this?
+// float min_command = 0.05f;
+
+// std::shared_ptr<NetworkTable> table = NetworkTable::GetTable("limelight");
+// float tx = table->GetNumber("tx");
+
+// if (joystick->GetRawButton(9))
+// {
+//         float heading_error = -tx;
+//         float steering_adjust = 0.0f;
+//         if (tx > 1.0)
+//         {
+//                 steering_adjust = Kp*heading_error - min_command;
+//         }
+//         else if (tx < 1.0)
+//         {
+//                 steering_adjust = Kp*heading_error + min_command;
+//         }
+//         left_command += steering_adjust;
+//         right_command -= steering_adjust;
+// }

@@ -40,6 +40,7 @@ public class BounceArmCommand extends CommandBase {
     }
 
     public void end(boolean interrupted) {
-        m_armSubsystem.setPosition(ArmConstants.kOutPosition);
+        m_armSubsystem.setPosition(ArmConstants.kInPosition); //TODO this should fix the issue with the chain from last week's practice
+        // 2/23 was kOutPosition --> no need this year to keep it out after picking up the balls, set it back to up position to prevent mechanical issues
     }
 }

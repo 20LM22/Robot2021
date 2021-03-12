@@ -1,5 +1,6 @@
 package frc.robot.commands.drivecommands;
 
+import frc.robot.commands.arduinocommands.UpdateLEDsCommand;
 import frc.robot.subsystems.ArduinoSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
 import edu.wpi.first.wpilibj.trajectory.Trajectory;
@@ -34,6 +35,10 @@ public class PixyGalacticCommand extends SequentialCommandGroup {
 
         if (m_arduinoSubsystem.getTargetInView()) { //the target is in the acceptable range --> run red path
             m_trajectory = trajectoryRed;
+            // new UpdateLEDsCommand(arduinoSubsystem, () -> {return MainLEDModes.kChasing;}, () -> {return 0.0;}, () -> {
+            // return m_flywheelSubsystem.getVelocity() > 5 ? ShooterLEDModes.kFlywheelPercent : ShooterLEDModes.kOff;}, () -> {
+            // return m_flywheelSubsystem.getVelocity() / m_flywheelSubsystem.getSetpoint() * 100.0;
+            // }, mainLEDValue, shooterLEDMode, shooterLEDValue));
         } else { //run the blue path
             m_trajectory = trajectoryBlue;
         }

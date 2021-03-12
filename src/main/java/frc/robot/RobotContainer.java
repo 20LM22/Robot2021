@@ -1,9 +1,7 @@
 package frc.robot;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Hashtable;
 import java.util.List;
 
 import edu.wpi.first.wpilibj.DriverStation;
@@ -13,8 +11,6 @@ import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.geometry.Transform2d;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
-import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.trajectory.Trajectory;
@@ -40,7 +36,6 @@ import frc.robot.commands.armcommands.BounceArmCommand;
 import frc.robot.commands.armcommands.DriveArmCommand;
 import frc.robot.commands.armcommands.ExtendArmCommand;
 import frc.robot.commands.armcommands.RetractArmCommand;
-import frc.robot.commands.autocommands.ShootCG;
 import frc.robot.commands.autocommands.ShootForwardCG;
 import frc.robot.commands.carouselcommands.AutoSpeedCarouselCommand;
 import frc.robot.commands.carouselcommands.RunCarouselCommand;
@@ -101,11 +96,11 @@ public class RobotContainer {
 		configureButtonBindings();
 		// configureTestingBindings();
 		configureShuffleboard();
+		
 		// Generate all trajectories at startup to prevent loop overrun
 		generateAutonomousCommands();
 		// LEDs
-		m_arduinoSubsystem.setDefaultCommand(new UpdateLEDsCommand(m_arduinoSubsystem, () -> { // TODO: add more things
-																								// for the LEDs to do
+		m_arduinoSubsystem.setDefaultCommand(new UpdateLEDsCommand(m_arduinoSubsystem, () -> { // TODO: add more things for the LEDs to do
 			return MainLEDModes.kChasing;
 		}, () -> {
 			return 0.0;
@@ -156,8 +151,12 @@ public class RobotContainer {
 		new JoystickButton(m_operatorController, Button.kX)
 				.whenHeld(new ParallelCommandGroup(new IntakeCommand(m_intakeSubsystem),
 						new RunCarouselCommand(m_carouselSubsystem, CarouselConstants.kIntakeVelocity)))
-				.whenHeld(new BounceArmCommand(m_armSubsystem));
-		new JoystickButton(m_operatorController, Button.kCircle).whenHeld(new OuttakeCommand(m_intakeSubsystem));
+				.whenHeld(new BounceArmCommand(m_armSubsystem)); // bounces the arm, spins the carousel, and turns on
+																	// the intake wheels
+		new JoystickButton(m_operatorController, Button.kCircle).whenHeld(new OuttakeCommand(m_intakeSubsystem)); // spins
+																													// intake
+																													// wheels
+																													// backwards
 		// Arm
 		new JoystickButton(m_operatorController, Button.kLeftBumper).whenPressed(new RetractArmCommand(m_armSubsystem));
 		new JoystickButton(m_operatorController, Button.kRightBumper).whenPressed(new ExtendArmCommand(m_armSubsystem));
@@ -207,6 +206,11 @@ public class RobotContainer {
 		// new JoystickButton(m_operatorController, Button.kTrackpad).whileActiveOnce(
 		// new DriveCarouselCommand(m_carouselSubsystem, () ->
 		// -m_driverController.getRawAxis(Axis.kRightY)));
+
+		// TODO change the zeroing of the arm encoder to a different button somewhere so
+		// that we can be sure it's actually being zeroed
+		new JoystickButton(m_operatorController, Button.kSquare).whenActive(() -> m_hoodSubsystem.resetEncoder(),
+				m_hoodSubsystem); // when active = when pressed
 	}
 
 	private void configureTestingBindings() {
@@ -240,6 +244,7 @@ public class RobotContainer {
 		// FieldLocation.CLOSETRENCH));
 		// hood
 		m_hoodSubsystem.setDefaultCommand(
+
 				new DriveHoodCommand(m_hoodSubsystem, () -> m_operatorController.getRawAxis(Axis.kRightY) * 0.1));
 
 		new JoystickButton(m_operatorController, Button.kOptions).whenPressed(() -> m_hoodSubsystem.resetEncoder());
@@ -268,7 +273,26 @@ public class RobotContainer {
 	}
 
 	public Command getAutonomousCommand() {
-		System.out.println("let's see what it's saying: " + m_autoChooser.getSelected().toString());
+		// return new TrajectoryFollowCommand(m_driveSubsystem,
+		// TrajectoryGenerator.generateTrajectory(new Pose2d(0,0,new Rotation2d()),
+		// List.of(
+		// new Translation2d(2.5, 0), new Translation2d(3.5, -1.2), new
+		// Translation2d(2.6, -1.6), new Translation2d(1.8, -1.2),
+		// new Translation2d(2.5, 0), new Translation2d(5.5, -.3), new Translation2d(6,
+		// 1.2), new Translation2d(5.5, 1.3),
+		// new Translation2d(4, .9), new Translation2d(5.5, -.6), new
+		// Translation2d(6.051, -1.524), new Translation2d(7, -.762),
+		// new Translation2d(6.8, 0)), new Pose2d(0,0, new Rotation2d(Math.PI)),
+		// DriveConstants.kTrajectoryConfig));
+
+		// return new TrajectoryFollowCommand(m_driveSubsystem,
+		// 		TrajectoryGenerator.generateTrajectory(new Pose2d(0, 0, new Rotation2d()),
+		// 				List.of(new Translation2d(2.7, 0), new Translation2d(3.6, -1.4), new Translation2d(2.6, -1.6),
+		// 						new Translation2d(1.7, -1.4), new Translation2d(2.5, 0.2), new Translation2d(5.7, -.3),
+		// 						new Translation2d(6, .9), new Translation2d(5.7, 1.1), new Translation2d(4.2, .9), new Translation2d(4.3, 0), 
+		// 						new Translation2d(6.9, -1.7), new Translation2d(8.3, -1.1), new Translation2d(8.2,0), new Translation2d(4,-0.1)),
+		// 				new Pose2d(0,0, new Rotation2d()), DriveConstants.kTrajectoryConfig));
+
 		return m_autoChooser.getSelected();
 	}
 
@@ -277,13 +301,6 @@ public class RobotContainer {
 	 * follow in AutoNav challenges and Galatic Search challenges
 	 */
 	private void generateAutonomousCommands() {
-		// Hashtable<String, Trajectory> trajectories = new Hashtable<String,
-		// Trajectory>();
-		// File[] files = new File("\\home\\lvuser\\deploy\\paths\\output").listFiles();
-		// create a file that is really a directory
-		// File aDirectory = new File("Robot2021/src/main/deploy/paths");
-		// get a listing of all files in the directory
-		// String[] files = aDirectory.list();
 
 		String trajectoryJSON = "/home/lvuser/deploy/Slalom.wpilib.json";
 		Trajectory trajectory = new Trajectory();
@@ -294,6 +311,15 @@ public class RobotContainer {
 			Transform2d transform = new Pose2d(0, 0, new Rotation2d()).minus(trajectory.getInitialPose());
 			Trajectory newTrajectory = trajectory.transformBy(transform);
 			m_autoChooser.addOption("Slalom", new TrajectoryFollowCommand(m_driveSubsystem, newTrajectory));
+
+			// andThen(new ShootSetupCommand(m_flywheelSubsystem, m_hoodSubsystem, () ->
+			// FieldLocation.YELLOW));
+			/*
+			 * TODO IF CREATING ANOTHER AUTO: would need another field location based on
+			 * ending point - can just adjust the path and then tune the launching speed +
+			 * angle manually
+			 */
+
 		} catch (IOException ex) {
 			DriverStation.reportError("Unable to open trajectory: " + trajectoryJSON, ex.getStackTrace());
 		}
@@ -328,10 +354,10 @@ public class RobotContainer {
 			Trajectory newTrajectory2 = trajectory2.transformBy(transform); // RED
 
 			m_autoChooser.addOption("Galactic Search A",
-					new PixyGalacticCommand(m_arduinoSubsystem, m_driveSubsystem, newTrajectory1, newTrajectory2));
-							// .deadlineWith(new IntakeCommand(m_intakeSubsystem),
-							// 		new RunCarouselCommand(m_carouselSubsystem, CarouselConstants.kIntakeVelocity),
-							// 		new BounceArmCommand(m_armSubsystem)));
+					new PixyGalacticCommand(m_arduinoSubsystem, m_driveSubsystem, newTrajectory1, newTrajectory2)
+							.deadlineWith(new IntakeCommand(m_intakeSubsystem),
+									new RunCarouselCommand(m_carouselSubsystem, CarouselConstants.kIntakeVelocity),
+									new BounceArmCommand(m_armSubsystem)));
 
 		} catch (IOException ex) {
 			DriverStation.reportError("Unable to open trajectory: " + trajectoryJSON, ex.getStackTrace());
@@ -351,10 +377,10 @@ public class RobotContainer {
 			Trajectory newTrajectory2 = trajectory2.transformBy(transform); // RED
 
 			m_autoChooser.addOption("Galactic Search B",
-					new PixyGalacticCommand(m_arduinoSubsystem, m_driveSubsystem, newTrajectory1, newTrajectory2));
-							// .deadlineWith(new IntakeCommand(m_intakeSubsystem),
-							// 		new RunCarouselCommand(m_carouselSubsystem, CarouselConstants.kIntakeVelocity),
-							// 		new BounceArmCommand(m_armSubsystem)));
+					new PixyGalacticCommand(m_arduinoSubsystem, m_driveSubsystem, newTrajectory1, newTrajectory2)
+							.deadlineWith(new IntakeCommand(m_intakeSubsystem),
+									new RunCarouselCommand(m_carouselSubsystem, CarouselConstants.kIntakeVelocity),
+									new BounceArmCommand(m_armSubsystem)));
 
 		} catch (IOException ex) {
 			DriverStation.reportError("Unable to open trajectory: " + trajectoryJSON, ex.getStackTrace());
@@ -364,40 +390,70 @@ public class RobotContainer {
 
 		Command b1 = new TrajectoryFollowCommand(m_driveSubsystem,
 				TrajectoryGenerator.generateTrajectory(new Pose2d(0, 0, new Rotation2d()),
-						List.of(new Translation2d(1, 0)), new Pose2d(1, .7, new Rotation2d(Math.PI / 2)),
-						DriveConstants.kTrajectoryConfig)); // based on data from Andrew's spline program
+						List.of(new Translation2d(1, 0)), new Pose2d(1.05, 1.1, new Rotation2d(Math.PI / 2)),
+						DriveConstants.kTrajectoryConfig));
 
-		Command b2 = new TrajectoryFollowCommand(m_driveSubsystem,
-				TrajectoryGenerator.generateTrajectory(new Pose2d(1, .7, new Rotation2d(Math.PI)),
-						List.of(new Translation2d(1, 0), new Translation2d(2, 0), new Translation2d(2, -1),
+		Command b2 = new TrajectoryFollowCommand(m_driveSubsystem, // this part needs to be updated to take out the
+																	// weird zig-zag motion
+				TrajectoryGenerator.generateTrajectory(new Pose2d(1.05, 1.1, new Rotation2d(Math.PI)), // so to prevent
+																										// the zig-zag,
+																										// shift 1 to
+																										// 1.05
+						List.of(new Translation2d(1.05, -.09), new Translation2d(1.8, -0.09),
+								new Translation2d(1.8, -1), // then shift 1 to 1.05 or 1.10
 								new Translation2d(3.55, -1)),
-						new Pose2d(3.55, .7, new Rotation2d(-Math.PI / 2)), DriveConstants.kTrajectoryConfigREVERSED));
+						new Pose2d(3.6, 1.4, new Rotation2d(-Math.PI / 2)), DriveConstants.kTrajectoryConfigREVERSED));
 
 		Command b3 = new TrajectoryFollowCommand(m_driveSubsystem,
-				TrajectoryGenerator.generateTrajectory(new Pose2d(3.6, 0.7, new Rotation2d(-Math.PI / 2)),
-						List.of(new Translation2d(3.8, -1), new Translation2d(5.8, -1)),
-						new Pose2d(6.1, .7, new Rotation2d(Math.PI / 2)), DriveConstants.kTrajectoryConfig));
+				TrajectoryGenerator.generateTrajectory(new Pose2d(3.6, 1.4, new Rotation2d(-Math.PI / 2)),
+						List.of(new Translation2d(4.1, -.9), new Translation2d(5.8, -.9)),
+						new Pose2d(6.2, 1.7, new Rotation2d(Math.PI / 2)), DriveConstants.kTrajectoryConfig));
 
 		Command b4 = new TrajectoryFollowCommand(m_driveSubsystem,
-				TrajectoryGenerator.generateTrajectory(new Pose2d(6.1, .7, new Rotation2d(Math.PI / 2)),
-						List.of(new Translation2d(6.1, 0)), new Pose2d(8, 0, new Rotation2d(Math.PI)),
+				TrajectoryGenerator.generateTrajectory(new Pose2d(6.2, 1.7, new Rotation2d(Math.PI / 2)),
+						List.of(new Translation2d(6.2, 1)), new Pose2d(8, 1, new Rotation2d(Math.PI)),
 						DriveConstants.kTrajectoryConfigREVERSED));
 
 		m_autoChooser.addOption("Bounce", b1.andThen(b2).andThen(b3).andThen(b4));
 
-		Command br = new TrajectoryFollowCommand(m_driveSubsystem, TrajectoryGenerator.generateTrajectory(new Pose2d(0, 0, new Rotation2d()), List.of(
-			new Translation2d(2.54, 0), new Translation2d(3.302, -0.254), new Translation2d(3.556, -0.635), new Translation2d(3.429, -1.27),
-			new Translation2d(2.794, -1.524), new Translation2d(2.032, -1.27), new Translation2d(2.032, -0.508), new Translation2d(2.286, -0.254))
-		, new Pose2d(3.048, 0, new Rotation2d()), DriveConstants.kTrajectoryConfig));
+		// So try this first...
+		// Command br = new TrajectoryFollowCommand(m_driveSubsystem,
+		// TrajectoryGenerator.generateTrajectory(new Pose2d(0, 0, new Rotation2d()),
+		// List.of(
+		// new Translation2d(2.54, 0), new Translation2d(3.302, -0.254), new
+		// Translation2d(3.556, -0.635), new Translation2d(3.429, -1.27),
+		// new Translation2d(2.794, -1.524), new Translation2d(2.032, -1.27), new
+		// Translation2d(2.032, -0.508), new Translation2d(2.286, -0.254))
+		// , new Pose2d(3.048, 0, new Rotation2d()), DriveConstants.kTrajectoryConfig));
 
-		Command br1 = new TrajectoryFollowCommand(m_driveSubsystem, TrajectoryGenerator.generateTrajectory(new Pose2d(3.048, 0, new Rotation2d()),
-		List.of(new Translation2d(5.08, -0.254), new Translation2d(5.588, 0.127), new Translation2d(5.969, 0.508),
-		new Translation2d(5.842, 1.27), new Translation2d(5.08, 1.778), new Translation2d(4.191, 1.143), new Translation2d(4.191, 0.635),
-		new Translation2d(4.699, -0.254), new Translation2d(5.334, -1.143), new Translation2d(5.969, -1.778), new Translation2d(6.604, -1.905),
-		new Translation2d(7.366, -1.524), new Translation2d(7.62, -0.889), new Translation2d(7.366, -0.254), new Translation2d(7.112, -0.0762),
-		new Translation2d(6.604, 0)), new Pose2d(0, 0, new Rotation2d(Math.PI)), DriveConstants.kTrajectoryConfig));
+		// Command br1 = new TrajectoryFollowCommand(m_driveSubsystem,
+		// TrajectoryGenerator.generateTrajectory(new Pose2d(3.048, 0, new
+		// Rotation2d()),
+		// List.of(new Translation2d(5.08, -0.254), new Translation2d(5.588, 0.127), new
+		// Translation2d(5.969, 0.508),
+		// new Translation2d(5.842, 1.27), new Translation2d(5.08, 1.778), new
+		// Translation2d(4.191, 1.143), new Translation2d(4.191, 0.635),
+		// new Translation2d(4.699, -0.254), new Translation2d(5.334, -1.143), new
+		// Translation2d(5.969, -1.778), new Translation2d(6.604, -1.905),
+		// new Translation2d(7.366, -1.524), new Translation2d(7.62, -0.889), new
+		// Translation2d(7.366, -0.254), new Translation2d(7.112, -0.0762),
+		// new Translation2d(6.604, 0)), new Pose2d(0, 0, new Rotation2d(Math.PI)),
+		// DriveConstants.kTrajectoryConfig));
 
-		m_autoChooser.addOption("Barrel racing", br.andThen(br1)); //based on data from Andrew's spline program
+		// Then try this...
 
+		Command barrelRacing = new TrajectoryFollowCommand(m_driveSubsystem, TrajectoryGenerator.generateTrajectory(
+				new Pose2d(0, 0, new Rotation2d()),
+				List.of(new Translation2d(2.286, 0), new Translation2d(3, -.762), new Translation2d(2.286, -1.524),
+						new Translation2d(1.524, -.762), new Translation2d(2.286, 0), new Translation2d(4.527, 0),
+						new Translation2d(5.289, .762), new Translation2d(4.527, 1.524), new Translation2d(3.765, .762),
+						new Translation2d(4.527, 0), new Translation2d(6.051, -1.524), new Translation2d(6.813, -.762),
+						new Translation2d(6.051, 0)),
+				new Pose2d(0, 0, new Rotation2d(Math.PI)), DriveConstants.kTrajectoryConfig));
+
+		// m_autoChooser.addOption("Barrel racing", br.andThen(br1)); //based on data
+		// from Andrew's spline program, TODO make my own --> like with the bounce path
+		// --> make like a 45 degree angle for last turn?
+		m_autoChooser.addOption("TESTING", barrelRacing);
 	}
 }
