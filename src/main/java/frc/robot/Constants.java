@@ -9,6 +9,11 @@ import edu.wpi.first.wpilibj.util.Units;
 
 //All gear ratios are in the form of driver rotations : driven rotations
 public final class Constants {
+
+	public static final class BeamBreakConstants{
+		public static final int kBeamBreakPort = 1;
+	}
+
 	public static final class ArduinoConstants {
 		public static final int kAddress = 0x1;
 
@@ -36,12 +41,30 @@ public final class Constants {
 		public static final class MainLEDModes {
 			public static final byte kOff = 0;
 			public static final byte kChasing = 1;
-			public static final byte kRedChasing = 2;
+			public static final byte kSolid = 2;
+			public static final byte kTwinkling = 3;
+			public static final byte kFlashing = 4;
+			public static final byte kCharging = 5;
 		}
 
 		public static final class ShooterLEDModes {
 			public static final byte kOff = 0;
-			public static final byte kFlywheelPercent = 1;
+			public static final byte kChasing = 1;
+			public static final byte kSolid = 2;
+			public static final byte kTwinkling = 3;
+			public static final byte kFlashing = 4;
+			public static final byte kCharging = 5;
+		}
+
+		public static final class LEDColorValues {
+			public static final double kNothing = 0.0;
+			public static final double kRed = 1.0;
+			public static final double kOrange = 2.0;
+			public static final double kYellow = 3.0;
+			public static final double kGreen = 4.0;
+			public static final double kBlue = 5.0;
+			public static final double kPurple = 6.0;
+			public static final double kWhite = 7.0;
 		}
 	}
 
@@ -197,9 +220,9 @@ public final class Constants {
 		public static final double kvVoltSecondsPerMeter = 2.68; //2.15
 		public static final double kaVoltSecondsSquaredPerMeter = 1.48; //.53
 		public static final double kTrackwidthMeters = .7815245428457417; //12.06096414412454
-		public static final double kMaxSpeedMetersPerSecond = 1.75; //TODO this must be increased to increase the speed of autos, increment slowly --> it was 2.25 m/s
+		public static final double kMaxSpeedMetersPerSecond = 2.25; //TODO this must be increased to increase the speed of autos, increment slowly --> it was 2.25 m/s
 		//TODO might need to make a new set of maxes + configs to handle the motion of picking up a ball - so for the auto challenges, make the speed 2.25
-		public static final double kMaxAccelerationMetersPerSecondSquared = .65; //TODO this could be changed to increase speed of autos --> it was 1.0 m/s^2, for the auto nav make it 1
+		public static final double kMaxAccelerationMetersPerSecondSquared = .75; //TODO this could be changed to increase speed of autos --> it was 1.0 m/s^2, for the auto nav make it 1
 		public static final double kMaxRotSpeedMetersPerSecond = 1.2;
 		public static final double kWheelDiameterMeters = Units.inchesToMeters(6);
 		public static final double kGearRatio = 8.18;

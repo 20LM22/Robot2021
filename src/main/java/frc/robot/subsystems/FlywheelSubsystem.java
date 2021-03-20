@@ -8,12 +8,18 @@ import com.revrobotics.CANSparkMax.SoftLimitDirection;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.ControlType;
 
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.BeamBreakConstants;
 import frc.robot.Constants.FlywheelConstants;
+import frc.robot.Constants.ArduinoConstants.LEDColorValues;
+import frc.robot.Constants.ArduinoConstants.MainLEDModes;
+import frc.robot.Constants.ArduinoConstants.ShooterLEDModes;
+import frc.robot.commands.arduinocommands.UpdateLEDsCommand;
 import frc.robot.ShuffleboardLogging;
 
 public class FlywheelSubsystem extends SubsystemBase implements ShuffleboardLogging {
@@ -25,6 +31,9 @@ public class FlywheelSubsystem extends SubsystemBase implements ShuffleboardLogg
     private final CANPIDController m_neoController = m_neoFlywheelMaster.getPIDController();
     private final CANEncoder m_neoEncoderMaster = m_neoFlywheelMaster.getEncoder();
     private double m_setVelocity;
+
+    private final DigitalInput m_beamBreakSensor = new DigitalInput(BeamBreakConstants.kBeamBreakPort);
+	private final ArduinoSubsystem m_arduinoSubsystem = new ArduinoSubsystem();
 
     /**
      * Initializes a new instance of the {@link FlywheelSubsystem} class.
@@ -60,6 +69,13 @@ public class FlywheelSubsystem extends SubsystemBase implements ShuffleboardLogg
     }
 
     public void periodic() {
+        //System.out.println("WHAT DOES THE BEAM BREAK SENSOR SEE? " + m_beamBreakSensor.get());
+        if(m_beamBreakSensor.get()){
+            //leds do stuff
+            new UpdateLEDsCommand(m_arduinoSubsystem, () -> {return MainLEDModes.kCharging;}, () -> {return LEDColorValues.kYellow;},
+                () -> {return ShooterLEDModes.kCharging;}, () -> {return LEDColorValues.kYellow;});
+        }
+
         SmartDashboard.putBoolean("Flywheel at Setpoint", atSetpoint());
         SmartDashboard.putNumber("Flywheel Velocity", getVelocity());
         if (m_setVelocity == 0) {

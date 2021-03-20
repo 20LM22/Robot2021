@@ -43,6 +43,10 @@ public class ArduinoSubsystem extends SubsystemBase implements ShuffleboardLoggi
 		// m_distancePid.setTolerance(ArduinoConstants.kDistanceTolerance);
 	}
 
+    // public void periodic() {
+	//    System.out.println("x value is " + getXValue());
+    // }
+
 	/**
 	 * @return Speed to turn to face target.
 	 */

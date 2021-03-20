@@ -37,7 +37,7 @@ public class LimelightTurnCommand extends CommandBase {
      * Set the tolerance and goal of the PID
      */
     public void initialize() {
-        m_limelightSubsystem.turnOnLight();
+        //m_limelightSubsystem.turnOnLight(); //so maybe if this is commented out then it won't create this issue
         m_turnController.setTolerance(LimelightConstants.kTurnTolerance);
         m_turnController.setGoal(m_turnGoal);
     }

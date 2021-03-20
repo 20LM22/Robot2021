@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 
+import com.ctre.phoenix.CANifier.LEDChannel;
+
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.Joystick;
@@ -21,6 +23,7 @@ import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.Constants.ArduinoConstants.LEDColorValues;
 import frc.robot.Constants.ArduinoConstants.MainLEDModes;
 import frc.robot.Constants.ArduinoConstants.ShooterLEDModes;
 import frc.robot.Constants.CarouselConstants;
@@ -96,20 +99,20 @@ public class RobotContainer {
 		configureButtonBindings();
 		// configureTestingBindings();
 		configureShuffleboard();
-		
+
 		// Generate all trajectories at startup to prevent loop overrun
 		generateAutonomousCommands();
 		// LEDs
-		m_arduinoSubsystem.setDefaultCommand(new UpdateLEDsCommand(m_arduinoSubsystem, () -> { // TODO: add more things for the LEDs to do
-			return MainLEDModes.kChasing;
-		}, () -> {
-			return 0.0;
-		}, () -> {
-			return m_flywheelSubsystem.getVelocity() > 5 ? ShooterLEDModes.kFlywheelPercent : ShooterLEDModes.kOff;
-		}, () -> {
-			return m_flywheelSubsystem.getVelocity() / m_flywheelSubsystem.getSetpoint() * 100.0;
-		}));
 
+		m_arduinoSubsystem.setDefaultCommand(new UpdateLEDsCommand(m_arduinoSubsystem, () -> {
+			return MainLEDModes.kTwinkling;
+		}, () -> {
+			return LEDColorValues.kGreen;
+		}, () -> {
+			return ShooterLEDModes.kTwinkling;
+		}, () -> {
+			return LEDColorValues.kGreen;
+		}));
 	}
 
 	private void configureButtonBindings() {
@@ -133,7 +136,16 @@ public class RobotContainer {
 				new IntakeCommand(m_intakeSubsystem), new BounceArmCommand(m_armSubsystem)));
 		// Turn to target
 		new JoystickButton(m_driverController, Button.kLeftBumper)
-				.whenHeld(new LimelightTurnCommand(m_limelightSubsystem, m_driveSubsystem, .2));
+				.whenHeld(new LimelightTurnCommand(m_limelightSubsystem, m_driveSubsystem, .2))
+				.whenHeld(new UpdateLEDsCommand(m_arduinoSubsystem, () -> {
+					return MainLEDModes.kSolid;
+				}, () -> {
+					return LEDColorValues.kGreen;
+				}, () -> {
+					return ShooterLEDModes.kSolid;
+				}, () -> {
+					return LEDColorValues.kGreen;
+				}));
 		// Run carousel fast
 		new JoystickButton(m_driverController, Button.kRightBumper)
 				.whenHeld(new AutoSpeedCarouselCommand(m_carouselSubsystem, m_flywheelSubsystem::getSetpoint));
@@ -286,12 +298,16 @@ public class RobotContainer {
 		// DriveConstants.kTrajectoryConfig));
 
 		// return new TrajectoryFollowCommand(m_driveSubsystem,
-		// 		TrajectoryGenerator.generateTrajectory(new Pose2d(0, 0, new Rotation2d()),
-		// 				List.of(new Translation2d(2.7, 0), new Translation2d(3.6, -1.4), new Translation2d(2.6, -1.6),
-		// 						new Translation2d(1.7, -1.4), new Translation2d(2.5, 0.2), new Translation2d(5.7, -.3),
-		// 						new Translation2d(6, .9), new Translation2d(5.7, 1.1), new Translation2d(4.2, .9), new Translation2d(4.3, 0), 
-		// 						new Translation2d(6.9, -1.7), new Translation2d(8.3, -1.1), new Translation2d(8.2,0), new Translation2d(4,-0.1)),
-		// 				new Pose2d(0,0, new Rotation2d()), DriveConstants.kTrajectoryConfig));
+		// TrajectoryGenerator.generateTrajectory(new Pose2d(0, 0, new Rotation2d()),
+		// List.of(new Translation2d(2.7, 0), new Translation2d(3.6, -1.4), new
+		// Translation2d(2.6, -1.6),
+		// new Translation2d(1.7, -1.4), new Translation2d(2.5, 0.2), new
+		// Translation2d(5.7, -.3),
+		// new Translation2d(6, .9), new Translation2d(5.7, 1.1), new Translation2d(4.2,
+		// .9), new Translation2d(4.3, 0),
+		// new Translation2d(6.9, -1.7), new Translation2d(8.3, -1.1), new
+		// Translation2d(8.2,0), new Translation2d(4,-0.1)),
+		// new Pose2d(0,0, new Rotation2d()), DriveConstants.kTrajectoryConfig));
 
 		return m_autoChooser.getSelected();
 	}
@@ -302,90 +318,81 @@ public class RobotContainer {
 	 */
 	private void generateAutonomousCommands() {
 
-		String trajectoryJSON = "/home/lvuser/deploy/Slalom.wpilib.json";
-		Trajectory trajectory = new Trajectory();
+		// LOADING SLALOM PATH
+		String trajectoryJSONSlalom = "/home/lvuser/deploy/Slalom.wpilib.json";
+		Trajectory trajectorySlalom = new Trajectory();
 
 		try {
-			Path trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(trajectoryJSON);
-			trajectory = TrajectoryUtil.fromPathweaverJson(trajectoryPath);
-			Transform2d transform = new Pose2d(0, 0, new Rotation2d()).minus(trajectory.getInitialPose());
-			Trajectory newTrajectory = trajectory.transformBy(transform);
-			m_autoChooser.addOption("Slalom", new TrajectoryFollowCommand(m_driveSubsystem, newTrajectory));
-
-			// andThen(new ShootSetupCommand(m_flywheelSubsystem, m_hoodSubsystem, () ->
-			// FieldLocation.YELLOW));
-			/*
-			 * TODO IF CREATING ANOTHER AUTO: would need another field location based on
-			 * ending point - can just adjust the path and then tune the launching speed +
-			 * angle manually
-			 */
-
+			Path trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(trajectoryJSONSlalom);
+			trajectorySlalom = TrajectoryUtil.fromPathweaverJson(trajectoryPath);
+			Transform2d transform = new Pose2d(0, 0, new Rotation2d()).minus(trajectorySlalom.getInitialPose());
+			trajectorySlalom = trajectorySlalom.transformBy(transform);
+			m_autoChooser.addOption("Slalom", new TrajectoryFollowCommand(m_driveSubsystem, trajectorySlalom));
 		} catch (IOException ex) {
-			DriverStation.reportError("Unable to open trajectory: " + trajectoryJSON, ex.getStackTrace());
+			DriverStation.reportError("Unable to open trajectory: " + trajectoryJSONSlalom, ex.getStackTrace());
 		}
 
-		// trajectoryJSON = "/home/lvuser/deploy/BarrelRacing.wpilib.json";
-		// try {
-		// Path trajectoryPath =
-		// Filesystem.getDeployDirectory().toPath().resolve(trajectoryJSON);
-		// trajectory = TrajectoryUtil.fromPathweaverJson(trajectoryPath);
-		// Transform2d transform = new Pose2d(0, 0, new
-		// Rotation2d()).minus(trajectory.getInitialPose());
-		// Trajectory newTrajectory = trajectory.transformBy(transform);
-		// m_autoChooser.addOption("Barrel Racing", new
-		// TrajectoryFollowCommand(m_driveSubsystem, newTrajectory));
-		// } catch (IOException ex) {
-		// DriverStation.reportError("Unable to open trajectory: " + trajectoryJSON,
-		// ex.getStackTrace());
-		// }
+		// LOADING ALL FOUR GALACTIC PATHS AND FEEDING THEM INTO THE COMMAND
 
-		trajectoryJSON = "/home/lvuser/deploy/GalacticSearchABlue.wpilib.json";
-		String trajectoryJSON2 = "/home/lvuser/deploy/GalacticSearchARed.wpilib.json";
-		Trajectory trajectory2 = new Trajectory(); // to be used with galactic search RED
+		// PATH A BLUE
+		String trajectoryJSONABlue = "/home/lvuser/deploy/GalacticSearchABlue.wpilib.json";
+		Trajectory trajectoryABlue = new Trajectory();
 
 		try {
-			Path trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(trajectoryJSON);
-			trajectory = TrajectoryUtil.fromPathweaverJson(trajectoryPath);
-			Transform2d transform = new Pose2d(0, 0, new Rotation2d()).minus(trajectory.getInitialPose());
-			Trajectory newTrajectory1 = trajectory.transformBy(transform); // BLUE
-
-			Path trajectoryPath2 = Filesystem.getDeployDirectory().toPath().resolve(trajectoryJSON2);
-			trajectory2 = TrajectoryUtil.fromPathweaverJson(trajectoryPath2);
-			Trajectory newTrajectory2 = trajectory2.transformBy(transform); // RED
-
-			m_autoChooser.addOption("Galactic Search A",
-					new PixyGalacticCommand(m_arduinoSubsystem, m_driveSubsystem, newTrajectory1, newTrajectory2)
-							.deadlineWith(new IntakeCommand(m_intakeSubsystem),
-									new RunCarouselCommand(m_carouselSubsystem, CarouselConstants.kIntakeVelocity),
-									new BounceArmCommand(m_armSubsystem)));
-
+			Path trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(trajectoryJSONABlue);
+			trajectoryABlue = TrajectoryUtil.fromPathweaverJson(trajectoryPath);
+			Transform2d transform = new Pose2d(0, 0, new Rotation2d()).minus(trajectoryABlue.getInitialPose());
+			trajectoryABlue = trajectoryABlue.transformBy(transform);
 		} catch (IOException ex) {
-			DriverStation.reportError("Unable to open trajectory: " + trajectoryJSON, ex.getStackTrace());
+			DriverStation.reportError("Unable to open trajectory: " + trajectoryJSONABlue, ex.getStackTrace());
 		}
 
-		trajectoryJSON = "/home/lvuser/deploy/GalacticSearchBBlue.wpilib.json";
-		trajectoryJSON2 = "/home/lvuser/deploy/GalacticSearchBRed.wpilib.json";
+		// PATH A RED
+		String trajectoryJSONARed = "/home/lvuser/deploy/GalacticSearchARed.wpilib.json";
+		Trajectory trajectoryARed = new Trajectory();
 
 		try {
-			Path trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(trajectoryJSON);
-			trajectory = TrajectoryUtil.fromPathweaverJson(trajectoryPath);
-			Transform2d transform = new Pose2d(0, 0, new Rotation2d()).minus(trajectory.getInitialPose());
-			Trajectory newTrajectory1 = trajectory.transformBy(transform); // BLUE
-
-			Path trajectoryPath2 = Filesystem.getDeployDirectory().toPath().resolve(trajectoryJSON2);
-			trajectory2 = TrajectoryUtil.fromPathweaverJson(trajectoryPath2);
-			Trajectory newTrajectory2 = trajectory2.transformBy(transform); // RED
-
-			m_autoChooser.addOption("Galactic Search B",
-					new PixyGalacticCommand(m_arduinoSubsystem, m_driveSubsystem, newTrajectory1, newTrajectory2)
-							.deadlineWith(new IntakeCommand(m_intakeSubsystem),
-									new RunCarouselCommand(m_carouselSubsystem, CarouselConstants.kIntakeVelocity),
-									new BounceArmCommand(m_armSubsystem)));
-
+			Path trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(trajectoryJSONARed);
+			trajectoryARed = TrajectoryUtil.fromPathweaverJson(trajectoryPath);
+			Transform2d transform = new Pose2d(0, 0, new Rotation2d()).minus(trajectoryARed.getInitialPose());
+			trajectoryARed = trajectoryARed.transformBy(transform);
 		} catch (IOException ex) {
-			DriverStation.reportError("Unable to open trajectory: " + trajectoryJSON, ex.getStackTrace());
+			DriverStation.reportError("Unable to open trajectory: " + trajectoryJSONARed, ex.getStackTrace());
 		}
 
+		// PATH B BLUE
+		String trajectoryJSONBBlue = "/home/lvuser/deploy/GalacticSearchBBlue.wpilib.json";
+		Trajectory trajectoryBBlue = new Trajectory();
+
+		try {
+			Path trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(trajectoryJSONBBlue);
+			trajectoryBBlue = TrajectoryUtil.fromPathweaverJson(trajectoryPath);
+			Transform2d transform = new Pose2d(0, 0, new Rotation2d()).minus(trajectoryBBlue.getInitialPose());
+			trajectoryBBlue = trajectoryBBlue.transformBy(transform);
+		} catch (IOException ex) {
+			DriverStation.reportError("Unable to open trajectory: " + trajectoryJSONBBlue, ex.getStackTrace());
+		}
+
+		// PATH B RED
+		String trajectoryJSONBRed = "/home/lvuser/deploy/GalacticSearchBRed.wpilib.json";
+		Trajectory trajectoryBRed = new Trajectory();
+
+		try {
+			Path trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(trajectoryJSONBRed);
+			trajectoryBRed = TrajectoryUtil.fromPathweaverJson(trajectoryPath);
+			Transform2d transform = new Pose2d(0, 0, new Rotation2d()).minus(trajectoryBRed.getInitialPose());
+			trajectoryBRed = trajectoryBRed.transformBy(transform);
+		} catch (IOException ex) {
+			DriverStation.reportError("Unable to open trajectory: " + trajectoryJSONBRed, ex.getStackTrace());
+		}
+
+		m_autoChooser.addOption("Galactic Search",
+				new PixyGalacticCommand(m_arduinoSubsystem, m_driveSubsystem, trajectoryARed, trajectoryBRed,
+						trajectoryABlue, trajectoryBBlue).deadlineWith(new IntakeCommand(m_intakeSubsystem),
+								new RunCarouselCommand(m_carouselSubsystem, CarouselConstants.kIntakeVelocity),
+								new BounceArmCommand(m_armSubsystem)));
+
+		// CREATING BOUNCE PATH
 		DriveConstants.kTrajectoryConfigREVERSED.setReversed(true);
 
 		Command b1 = new TrajectoryFollowCommand(m_driveSubsystem,
@@ -442,18 +449,39 @@ public class RobotContainer {
 
 		// Then try this...
 
+		// CREATING BARREL RACING PATH
 		Command barrelRacing = new TrajectoryFollowCommand(m_driveSubsystem, TrajectoryGenerator.generateTrajectory(
 				new Pose2d(0, 0, new Rotation2d()),
-				List.of(new Translation2d(2.286, 0), new Translation2d(3, -.762), new Translation2d(2.286, -1.524),
-						new Translation2d(1.524, -.762), new Translation2d(2.286, 0), new Translation2d(4.527, 0),
-						new Translation2d(5.289, .762), new Translation2d(4.527, 1.524), new Translation2d(3.765, .762),
-						new Translation2d(4.527, 0), new Translation2d(6.051, -1.524), new Translation2d(6.813, -.762),
-						new Translation2d(6.051, 0)),
+				List.of(new Translation2d(2.8, 0.1), new Translation2d(3.3, -1), new Translation2d(2.45, -1.7),
+						new Translation2d(1.56, -1), new Translation2d(2.386, 0.1), new Translation2d(5.1, -.1), 
+						new Translation2d(5.75, 1.3), new Translation2d(4.8, 1.524), new Translation2d(3.9, .762),
+						new Translation2d(4.527, 0), new Translation2d(6.6, -1.85), new Translation2d(7.1, -.762), //something about this ending was wrong
+						new Translation2d(7.1, -.15)),
 				new Pose2d(0, 0, new Rotation2d(Math.PI)), DriveConstants.kTrajectoryConfig));
 
 		// m_autoChooser.addOption("Barrel racing", br.andThen(br1)); //based on data
 		// from Andrew's spline program, TODO make my own --> like with the bounce path
 		// --> make like a 45 degree angle for last turn?
-		m_autoChooser.addOption("TESTING", barrelRacing);
+		m_autoChooser.addOption("Barrel Racing", barrelRacing);
+
+		// SOMETHING TO TEST OUT: BARREL RACING BASED ON PATHWEAVER
+		// String trajectoryJSONBarrel = "/home/lvuser/deploy/BarrelRacing.wpilib.json";
+		// Trajectory trajectoryBarrel = new Trajectory();
+
+		// try {
+		// 	Path trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(trajectoryJSONBarrel);
+		// 	trajectoryBarrel = TrajectoryUtil.fromPathweaverJson(trajectoryPath);
+		// 	Transform2d transform = new Pose2d(0, 0, new Rotation2d()).minus(trajectoryBarrel.getInitialPose());
+		// 	trajectoryBarrel = trajectoryBarrel.transformBy(transform);
+		// } catch (IOException ex) {
+		// 	DriverStation.reportError("Unable to open trajectory: " + trajectoryJSONBarrel, ex.getStackTrace());
+		// }
+
+		// m_autoChooser.addOption("Galactic Search",
+		// 		new PixyGalacticCommand(m_arduinoSubsystem, m_driveSubsystem, trajectoryARed, trajectoryBRed,
+		// 				trajectoryABlue, trajectoryBBlue).deadlineWith(new IntakeCommand(m_intakeSubsystem),
+		// 						new RunCarouselCommand(m_carouselSubsystem, CarouselConstants.kIntakeVelocity),
+		// 						new BounceArmCommand(m_armSubsystem)));
+
 	}
 }
