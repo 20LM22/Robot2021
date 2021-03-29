@@ -154,6 +154,7 @@ public class RobotContainer {
 		// Run carousel default speed
 		new POVButton(m_driverController, DPad.kDown)
 				.toggleWhenPressed(new RunCarouselCommand(m_carouselSubsystem, CarouselConstants.kVelocity));
+		//run feeder in reverse
 		new POVButton(m_driverController, DPad.kRight).whenHeld(new ReverseFeederCommand(m_feederSubsystem));
 		new POVButton(m_driverController, DPad.kLeft)
 				.whenHeld(new BackupCommand(m_driveSubsystem, DriveConstants.kBackupDistance));
@@ -169,7 +170,7 @@ public class RobotContainer {
 																													// intake
 																													// wheels
 																													// backwards
-		// Arm
+		// arm driven up and down
 		new JoystickButton(m_operatorController, Button.kLeftBumper).whenPressed(new RetractArmCommand(m_armSubsystem));
 		new JoystickButton(m_operatorController, Button.kRightBumper).whenPressed(new ExtendArmCommand(m_armSubsystem));
 		new Trigger(() -> Math.abs(
@@ -309,7 +310,17 @@ public class RobotContainer {
 		// Translation2d(8.2,0), new Translation2d(4,-0.1)),
 		// new Pose2d(0,0, new Rotation2d()), DriveConstants.kTrajectoryConfig));
 
-		return m_autoChooser.getSelected();
+		return new TrajectoryFollowCommand(m_driveSubsystem, TrajectoryGenerator.generateTrajectory(
+			new Pose2d(0, 0, new Rotation2d()),
+			List.of(new Translation2d(3.1, 0.1), new Translation2d(3.5, -1), new Translation2d(2.45, -1.6),
+					new Translation2d(1.56, -.9), new Translation2d(2.386, 0), new Translation2d(5.4, -.2), 
+					new Translation2d(6, 1.1), new Translation2d(4.9, 1.524), new Translation2d(4.2, .762),
+					new Translation2d(4.527, 0), new Translation2d(6.6, -1.5), new Translation2d(7.5, -.95), //7.1, -.762 AND 6.6, -1.85
+					new Translation2d(7.15, -.3)), //7.1, -.15
+			new Pose2d(0, .2, new Rotation2d(Math.PI)), DriveConstants.kTrajectoryConfig));
+
+
+		//return m_autoChooser.getSelected();
 	}
 
 	/**
@@ -452,11 +463,11 @@ public class RobotContainer {
 		// CREATING BARREL RACING PATH
 		Command barrelRacing = new TrajectoryFollowCommand(m_driveSubsystem, TrajectoryGenerator.generateTrajectory(
 				new Pose2d(0, 0, new Rotation2d()),
-				List.of(new Translation2d(2.8, 0.1), new Translation2d(3.3, -1), new Translation2d(2.45, -1.7),
-						new Translation2d(1.56, -1), new Translation2d(2.386, 0.1), new Translation2d(5.1, -.1), 
-						new Translation2d(5.75, 1.3), new Translation2d(4.8, 1.524), new Translation2d(3.9, .762),
-						new Translation2d(4.527, 0), new Translation2d(6.6, -1.85), new Translation2d(7.1, -.762), //something about this ending was wrong
-						new Translation2d(7.1, -.15)),
+				List.of(new Translation2d(2.9, 0.1), new Translation2d(3.3, -1), new Translation2d(2.45, -1.7),
+						new Translation2d(1.56, -1), new Translation2d(2.386, 0.1), new Translation2d(5.2, -.1), 
+						new Translation2d(5.8, 1.3), new Translation2d(4.8, 1.524), new Translation2d(3.9, .762),
+						new Translation2d(4.527, 0), new Translation2d(6.6, -1.8), new Translation2d(7.6, -.95), //7.1, -.762 AND 6.6, -1.85
+						new Translation2d(7.0, -.3)), //7.1, -.15
 				new Pose2d(0, 0, new Rotation2d(Math.PI)), DriveConstants.kTrajectoryConfig));
 
 		// m_autoChooser.addOption("Barrel racing", br.andThen(br1)); //based on data
